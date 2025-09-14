@@ -53,7 +53,7 @@
         <activity
             android:name=".user.dashboard.UserDashboardActivity"
             android:exported="false"
-            android:label="User Dashboard" />
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
         <!-- Registration Activity -->
         <activity
