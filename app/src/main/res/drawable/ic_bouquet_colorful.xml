@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportWidth="70"
+    android:viewportHeight="70">
+    
+    <!-- Beautiful flowers with gradients -->
+    <path
+        android:fillColor="#FF6B9D"
+        android:pathData="M25,20 C23,18 23,24 25,22 C27,24 27,18 25,20" />
+    
+    <path
+        android:fillColor="#FF8E9B"
+        android:pathData="M35,15 C33,13 33,19 35,17 C37,19 37,13 35,15" />
+    
+    <path
+        android:fillColor="#C44569"
+        android:pathData="M45,20 C43,18 43,24 45,22 C47,24 47,18 45,20" />
+    
+    <path
+        android:fillColor="#F8B500"
+        android:pathData="M30,28 C28,26 28,32 30,30 C32,32 32,26 30,28" />
+    
+    <path
+        android:fillColor="#FF6348"
+        android:pathData="M40,28 C38,26 38,32 40,30 C42,32 42,26 40,28" />
+    
+    <!-- Beautiful leaves -->
+    <path
+        android:fillColor="#26A69A"
+        android:pathData="M28,35 C26,37 30,40 32,35 C32,35 28,35 28,35" />
+    
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M42,35 C44,37 40,40 38,35 C38,35 42,35 42,35" />
+    
+    <!-- Elegant stem -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M34,35 L34,55 C34,55 36,55 36,55 L36,35" />
+    
+    <!-- Beautiful ribbon -->
+    <path
+        android:fillColor="#E91E63"
+        android:pathData="M30,50 C28,48 28,52 35,52 C42,52 42,48 40,50 C40,50 30,50 30,50" />
+    
+</vector>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Soft Pink Color Palette - Based on provided design -->
+    <color name="pink_lightest">#FFE9EF</color>     <!-- #FFE9EF -->
+    <color name="pink_light">#FFC9D7</color>        <!-- #FFC9D7 -->
+    <color name="pink_medium">#FFBCCD</color>        <!-- #FFBCCD -->
+    <color name="pink_primary">#FF9CB5</color>       <!-- #FF9CB5 -->
+    <color name="pink_accent">#FC809F</color>        <!-- #FC809F -->
+    
+    <!-- System Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Background Colors -->
+    <color name="background_primary">@color/pink_lightest</color>
+    <color name="background_secondary">#FFFFFF</color>
+    <color name="background_card">@color/white</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#2D3748</color>
+    <color name="text_secondary">#718096</color>
+    <color name="text_hint">#A0AEC0</color>
+    <color name="text_on_pink">@color/white</color>
+    
+    <!-- Button & Interactive Colors -->
+    <color name="button_primary">@color/pink_primary</color>
+    <color name="button_secondary">@color/pink_light</color>
+    <color name="button_pressed">@color/pink_accent</color>
+    <color name="ripple_color">#30FC809F</color>
+    
+    <!-- Input Colors -->
+    <color name="input_background">@color/white</color>
+    <color name="input_stroke">@color/pink_light</color>
+    <color name="input_focused">@color/pink_primary</color>
+    
+    <!-- Border & Divider Colors -->
+    <color name="border_light">@color/pink_light</color>
+    <color name="border_medium">@color/pink_medium</color>
+    <color name="divider">@color/pink_light</color>
+    
+    <!-- Status Colors (with pink tints) -->
+    <color name="success">#10B981</color>
+    <color name="error">#EF4444</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">@color/pink_primary</color>
+    
+</resources>

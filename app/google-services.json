@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "645690227707",
+    "project_id": "bouquet-bliss",
+    "storage_bucket": "bouquet-bliss.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645690227707:android:cc0d13a244c4e679e8a95e",
+        "android_client_info": {
+          "package_name": "com.example.bouquetbliss"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCvrpSB9maFxJqVBUNfXszJQKCe7Ng_ZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

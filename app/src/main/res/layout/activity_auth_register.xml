@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="80dp"
+    android:paddingBottom="32dp">
+
+    <!-- App Logo -->
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:src="@drawable/lc_launcher_foreground"
+        android:scaleType="centerCrop"
+        android:background="@drawable/rounded_image_background"
+        android:padding="8dp"
+        android:contentDescription="Bouquet Bliss Logo" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Account"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:fontFamily="sans-serif"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign up to get started"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:fontFamily="sans-serif"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Full Name Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilFullName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:boxStrokeColor="@color/border_light"
+        app:boxBackgroundColor="@color/input_background"
+        app:hintTextColor="@color/text_secondary"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeWidth="1dp"
+        app:startIconDrawable="@drawable/ic_person_beautiful"
+        app:startIconTint="@color/text_secondary"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your full name"
+            android:inputType="textPersonName|textCapWords"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:paddingVertical="16dp"
+            android:background="@android:color/transparent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Email Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:boxStrokeColor="@color/border_light"
+        app:boxBackgroundColor="@color/input_background"
+        app:hintTextColor="@color/text_secondary"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeWidth="1dp"
+        app:startIconDrawable="@drawable/ic_email_beautiful"
+        app:startIconTint="@color/text_secondary"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your email address"
+            android:inputType="textEmailAddress"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:paddingVertical="16dp"
+            android:background="@android:color/transparent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:boxStrokeColor="@color/border_light"
+        app:boxBackgroundColor="@color/input_background"
+        app:hintTextColor="@color/text_secondary"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/text_secondary"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeWidth="1dp"
+        app:startIconDrawable="@drawable/ic_lock_beautiful"
+        app:startIconTint="@color/text_secondary"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your password"
+            android:inputType="textPassword"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:paddingVertical="16dp"
+            android:background="@android:color/transparent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Confirm Password Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        app:boxStrokeColor="@color/border_light"
+        app:boxBackgroundColor="@color/input_background"
+        app:hintTextColor="@color/text_secondary"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/text_secondary"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeWidth="1dp"
+        app:startIconDrawable="@drawable/ic_lock_beautiful"
+        app:startIconTint="@color/text_secondary"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Confirm your password"
+            android:inputType="textPassword"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:paddingVertical="16dp"
+            android:background="@android:color/transparent" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Register Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="32dp"
+        android:text="Create Account"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"
+        app:cornerRadius="12dp"
+        android:background="@drawable/soft_pink_button"
+        android:elevation="2dp"
+        app:rippleColor="@color/ripple_color"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton" />
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:visibility="gone"
+        android:indeterminateTint="@color/pink_primary" />
+
+    <!-- Bottom spacing -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Sign In Link -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already have an account? "
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary" />
+
+        <TextView
+            android:id="@+id/tvLoginBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign in"
+            android:textColor="@color/pink_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
