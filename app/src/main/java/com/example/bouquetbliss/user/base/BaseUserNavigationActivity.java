@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.user.dashboard.UserDashboardActivity;
+import com.example.bouquetbliss.user.browse.BrowseBouquetsActivity;
+import com.example.bouquetbliss.user.orders.UserOrdersActivity;
 import com.example.bouquetbliss.common.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -95,11 +97,21 @@ public abstract class BaseUserNavigationActivity extends AppCompatActivity {
     }
 
     private void navigateToBrowse() {
-        Toast.makeText(this, "Browse Bouquets module coming soon!", Toast.LENGTH_SHORT).show();
+        if (!(this instanceof BrowseBouquetsActivity)) {
+            Intent intent = new Intent(this, BrowseBouquetsActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "You're already browsing bouquets", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void navigateToOrders() {
-        Toast.makeText(this, "Orders module coming soon!", Toast.LENGTH_SHORT).show();
+        if (!(this instanceof UserOrdersActivity)) {
+            Intent intent = new Intent(this, UserOrdersActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "You're already viewing orders", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showProfileMenu() {
