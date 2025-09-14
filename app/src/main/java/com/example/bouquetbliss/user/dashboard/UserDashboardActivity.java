@@ -9,9 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.common.auth.LoginActivity;
 import com.example.bouquetbliss.databinding.ActivityUserDashboardBinding;
+import com.example.bouquetbliss.user.base.BaseUserNavigationActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class UserDashboardActivity extends AppCompatActivity {
+public class UserDashboardActivity extends BaseUserNavigationActivity {
 
     private ActivityUserDashboardBinding binding;
     private FirebaseAuth mAuth;
@@ -25,35 +26,28 @@ public class UserDashboardActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         setupClickListeners();
+        setupUserBottomNavigation();
+        setSelectedNavItem("home");
     }
 
     private void setupClickListeners() {
         binding.cardBrowseBouquets.setOnClickListener(v -> {
-            Toast.makeText(this, "Modul Penyediaan dan Permintaan Stok akan dilaksanakan tidak lama lagi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Browse Bouquets module coming soon!", Toast.LENGTH_SHORT).show();
         });
 
         binding.cardMyOrders.setOnClickListener(v -> {
-            Toast.makeText(this, "Modul Tempahan Saya akan dilaksanakan tidak lama lagi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "My Orders module coming soon!", Toast.LENGTH_SHORT).show();
         });
 
         binding.cardOrderHistory.setOnClickListener(v -> {
-            Toast.makeText(this, "Modul Sejarah Tempahan akan dilaksanakan tidak lama lagi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Order History module coming soon!", Toast.LENGTH_SHORT).show();
         });
 
         binding.cardProfile.setOnClickListener(v -> {
-            Toast.makeText(this, "Modul Profil Pengguna akan dilaksanakan tidak lama lagi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "User Profile module coming soon!", Toast.LENGTH_SHORT).show();
         });
-
-        binding.btnLogout.setOnClickListener(v -> performLogout());
-    }
-
-    private void performLogout() {
-        mAuth.signOut();
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-        Toast.makeText(this, "Berjaya log keluar", Toast.LENGTH_SHORT).show();
+        
+        // Bottom Navigation is handled by base class
     }
 
     @Override
