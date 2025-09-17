@@ -67,6 +67,7 @@
                     android:padding="12dp">
 
                     <TextView
+                        android:id="@+id/tvTotalOrders"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="45"
@@ -102,6 +103,7 @@
                     android:padding="12dp">
 
                     <TextView
+                        android:id="@+id/tvPendingOrders"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="128"
@@ -112,7 +114,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Users"
+                        android:text="Pending"
                         android:textSize="12sp"
                         android:textColor="@color/text_secondary" />
 
@@ -137,6 +139,7 @@
                     android:padding="12dp">
 
                     <TextView
+                        android:id="@+id/tvTotalRevenue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="89"
@@ -147,7 +150,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Products"
+                        android:text="Revenue"
                         android:textSize="12sp"
                         android:textColor="@color/text_secondary" />
 

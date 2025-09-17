@@ -106,9 +106,9 @@ public class UserOrdersActivity extends BaseUserNavigationActivity {
     }
 
     private void onOrderClick(Order order) {
-        // TODO: Navigate to order details activity
-        Toast.makeText(this, "Order ID: " + order.getFormattedOrderId() + 
-                "\nStatus: " + order.getStatus(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, UserOrderDetailsActivity.class);
+        intent.putExtra("order_id", order.getId());
+        startActivity(intent);
     }
 
     public void refreshOrders() {

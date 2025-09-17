@@ -131,6 +131,8 @@ public class StockManagementActivity extends BaseAdminNavigationActivity {
         binding.btnSearch.setOnClickListener(v -> {
             Toast.makeText(this, "Search functionality coming soon!", Toast.LENGTH_SHORT).show();
         });
+        
+        binding.btnStockSummary.setOnClickListener(v -> openStockSummary());
 
         binding.cardAddBouquet.setOnClickListener(v -> openAddBouquet());
         binding.fabAddBouquet.setOnClickListener(v -> openAddBouquet());
@@ -138,6 +140,9 @@ public class StockManagementActivity extends BaseAdminNavigationActivity {
         binding.cardCategories.setOnClickListener(v -> {
             Toast.makeText(this, "Category management coming soon!", Toast.LENGTH_SHORT).show();
         });
+        
+        // Add stock receiving navigation
+        binding.btnStockReceiving.setOnClickListener(v -> openStockReceiving());
     }
 
     private void loadBouquets() {
@@ -267,6 +272,16 @@ public class StockManagementActivity extends BaseAdminNavigationActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+    
+    private void openStockReceiving() {
+        Intent intent = new Intent(this, StockReceivingActivity.class);
+        startActivity(intent);
+    }
+    
+    private void openStockSummary() {
+        Intent intent = new Intent(this, StockSummaryActivity.class);
+        startActivity(intent);
     }
 
 

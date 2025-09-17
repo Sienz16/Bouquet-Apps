@@ -15,6 +15,7 @@ import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.admin.dashboard.AdminDashboardActivity;
 import com.example.bouquetbliss.admin.orders.AdminOrderManagementActivity;
 import com.example.bouquetbliss.admin.profile.AdminProfileActivity;
+import com.example.bouquetbliss.admin.reports.ReportsActivity;
 import com.example.bouquetbliss.admin.stock.StockManagementActivity;
 import com.example.bouquetbliss.common.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,11 +26,13 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
         LinearLayout navHome = findViewById(R.id.navHome);
         LinearLayout navOrders = findViewById(R.id.navOrders);
         LinearLayout navStock = findViewById(R.id.navStock);
+        LinearLayout navReports = findViewById(R.id.navReports);
         LinearLayout navProfile = findViewById(R.id.navProfile);
 
         navHome.setOnClickListener(v -> navigateToHome());
         navOrders.setOnClickListener(v -> navigateToOrders());
         navStock.setOnClickListener(v -> navigateToStock());
+        navReports.setOnClickListener(v -> navigateToReports());
         navProfile.setOnClickListener(v -> showProfileMenu());
     }
 
@@ -38,6 +41,7 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
         resetNavItem(R.id.navHome);
         resetNavItem(R.id.navOrders);
         resetNavItem(R.id.navStock);
+        resetNavItem(R.id.navReports);
         resetNavItem(R.id.navProfile);
 
         // Set the current page as selected
@@ -50,6 +54,9 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
                 break;
             case "stock":
                 setNavItemSelected(R.id.navStock);
+                break;
+            case "reports":
+                setNavItemSelected(R.id.navReports);
                 break;
             case "profile":
                 setNavItemSelected(R.id.navProfile);
@@ -107,6 +114,13 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
     private void navigateToStock() {
         if (!(this instanceof StockManagementActivity)) {
             Intent intent = new Intent(this, StockManagementActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    private void navigateToReports() {
+        if (!(this instanceof ReportsActivity)) {
+            Intent intent = new Intent(this, ReportsActivity.class);
             startActivity(intent);
         }
     }

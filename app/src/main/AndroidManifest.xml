@@ -9,6 +9,8 @@
     <!-- Permissions for image upload -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.CAMERA" />
     
     <!-- For devices running Android 13+ (API 33+) -->
@@ -51,6 +53,16 @@
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
         <activity
+            android:name=".admin.orders.OrderDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
+            android:name=".admin.reports.ReportsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
             android:name=".user.dashboard.UserDashboardActivity"
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
@@ -70,6 +82,16 @@
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
+        <activity
+            android:name=".user.orders.UserOrderDetailsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
+            android:name=".user.orders.UserOrderHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
         <!-- Registration Activity -->
         <activity
             android:name=".common.auth.RegisterActivity"
@@ -79,6 +101,21 @@
         <!-- Stock Management Activities -->
         <activity
             android:name=".admin.stock.StockManagementActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
+            android:name=".admin.stock.StockReceivingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
+            android:name=".admin.stock.StockSummaryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
+            android:name=".admin.stock.StockHistoryActivity"
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
