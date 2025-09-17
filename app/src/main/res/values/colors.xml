@@ -44,4 +44,12 @@
     <color name="warning">#F59E0B</color>
     <color name="info">@color/pink_primary</color>
     
+    <!-- Stock Status Colors -->
+    <color name="status_available">#10B981</color>
+    <color name="status_available_bg">#DCFCE7</color>
+    <color name="status_limited">#F59E0B</color>
+    <color name="status_limited_bg">#FEF3C7</color>
+    <color name="status_out_of_stock">#EF4444</color>
+    <color name="status_out_of_stock_bg">#FEE2E2</color>
+    
 </resources>

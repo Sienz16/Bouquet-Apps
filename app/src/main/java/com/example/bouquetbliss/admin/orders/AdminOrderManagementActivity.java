@@ -16,6 +16,9 @@ import com.example.bouquetbliss.admin.base.BaseAdminNavigationActivity;
 import com.example.bouquetbliss.databinding.ActivityAdminOrderManagementBinding;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.models.OrderItem;
+import com.example.bouquetbliss.models.StockTransaction;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -143,11 +146,6 @@ public class AdminOrderManagementActivity extends BaseAdminNavigationActivity im
     }
 
     private void loadOrders() {
-        // For demo purposes, create some sample orders
-        createSampleOrders();
-        
-        // In a real app, you would load from Firestore:
-        /*
         db.collection("orders")
                 .orderBy("orderDate", Query.Direction.DESCENDING)
                 .get()
@@ -164,55 +162,10 @@ public class AdminOrderManagementActivity extends BaseAdminNavigationActivity im
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to load orders: " + e.getMessage(), 
                         Toast.LENGTH_SHORT).show();
+                    // If no orders exist, show empty state
+                    updateStatistics();
+                    filterOrders();
                 });
-        */
-    }
-
-    private void createSampleOrders() {
-        orderList.clear();
-        
-        // Sample Order 1 - Pending
-        List<OrderItem> items1 = Arrays.asList(
-            new OrderItem("b1", "Rose Garden Bouquet", "", 75.0, 2)
-        );
-        Order order1 = new Order("c1", "John Doe", "+60 12-345 6789", "john@email.com",
-            items1, 150.0, System.currentTimeMillis() + (2 * 24 * 60 * 60 * 1000), "123 Main St");
-        order1.setId("order1");
-        orderList.add(order1);
-
-        // Sample Order 2 - Approved
-        List<OrderItem> items2 = Arrays.asList(
-            new OrderItem("b2", "Tulip Delight", "", 65.0, 1)
-        );
-        Order order2 = new Order("c2", "Jane Smith", "+60 19-876 5432", "jane@email.com",
-            items2, 65.0, System.currentTimeMillis() + (3 * 24 * 60 * 60 * 1000), "456 Oak Ave");
-        order2.setId("order2");
-        order2.setStatus(Order.Status.APPROVED);
-        order2.setPreparationStatus(Order.PreparationStatus.PREPARING);
-        orderList.add(order2);
-
-        // Sample Order 3 - Completed
-        List<OrderItem> items3 = Arrays.asList(
-            new OrderItem("b3", "Sunflower Joy", "", 55.0, 3)
-        );
-        Order order3 = new Order("c3", "Bob Johnson", "+60 16-234 5678", "bob@email.com",
-            items3, 165.0, System.currentTimeMillis() - (1 * 24 * 60 * 60 * 1000), "789 Pine Rd");
-        order3.setId("order3");
-        order3.setStatus(Order.Status.COMPLETED);
-        order3.setPreparationStatus(Order.PreparationStatus.COMPLETED);
-        orderList.add(order3);
-
-        // Sample Order 4 - Pending
-        List<OrderItem> items4 = Arrays.asList(
-            new OrderItem("b4", "Lily Elegance", "", 80.0, 1)
-        );
-        Order order4 = new Order("c4", "Alice Wilson", "+60 17-345 6789", "alice@email.com",
-            items4, 80.0, System.currentTimeMillis() + (4 * 24 * 60 * 60 * 1000), "321 Elm St");
-        order4.setId("order4");
-        orderList.add(order4);
-
-        updateStatistics();
-        filterOrders();
     }
 
     private void filterOrders() {
@@ -274,8 +227,9 @@ public class AdminOrderManagementActivity extends BaseAdminNavigationActivity im
     // OrderAdapter.OnOrderActionListener implementations
     @Override
     public void onViewDetails(Order order) {
-        // TODO: Implement order details view
-        Toast.makeText(this, "Order details for " + order.getFormattedOrderId(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, OrderDetailsActivity.class);
+        intent.putExtra("order_id", order.getId());
+        startActivity(intent);
     }
 
     @Override
@@ -355,23 +309,93 @@ public class AdminOrderManagementActivity extends BaseAdminNavigationActivity im
     }
 
     private void updateOrderInDatabase(Order order) {
-        // In a real app, update Firestore:
-        /*
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", order.getStatus());
         updates.put("preparationStatus", order.getPreparationStatus());
-        updates.put("updatedAt", order.getUpdatedAt());
+        updates.put("updatedAt", System.currentTimeMillis());
+        
         if (order.getRejectionReason() != null) {
             updates.put("rejectionReason", order.getRejectionReason());
         }
 
         db.collection("orders").document(order.getId())
             .update(updates)
+            .addOnSuccessListener(aVoid -> {
+                // Update successful - create stock transaction if order is being fulfilled
+                if (order.getStatus().equals(Order.Status.COMPLETED)) {
+                    createStockTransactionForOrder(order);
+                }
+            })
             .addOnFailureListener(e -> {
                 Toast.makeText(this, "Failed to update order: " + e.getMessage(), 
                     Toast.LENGTH_SHORT).show();
             });
-        */
+    }
+
+    private void createStockTransactionForOrder(Order order) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String adminId = currentUser != null ? currentUser.getUid() : "system";
+        String adminName = currentUser != null ? 
+            (currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "Admin") : "System";
+
+        // Create stock transactions for each item in the order
+        for (OrderItem item : order.getItems()) {
+            // First, get current stock level
+            db.collection("bouquets").document(item.getBouquetId())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        int currentStock = documentSnapshot.getLong("quantity").intValue();
+                        int quantityUsed = item.getQuantity();
+                        int newStock = Math.max(0, currentStock - quantityUsed);
+                        
+                        // Update bouquet stock
+                        Map<String, Object> stockUpdates = new HashMap<>();
+                        stockUpdates.put("quantity", newStock);
+                        stockUpdates.put("updatedAt", System.currentTimeMillis());
+                        
+                        // Update availability based on new stock
+                        String availability;
+                        if (newStock <= 0) {
+                            availability = "Out of Stock";
+                        } else if (newStock <= 5) {
+                            availability = "Limited";
+                        } else {
+                            availability = "Available";
+                        }
+                        stockUpdates.put("availability", availability);
+                        
+                        db.collection("bouquets").document(item.getBouquetId())
+                            .update(stockUpdates)
+                            .addOnSuccessListener(aVoid -> {
+                                // Create stock transaction record
+                                StockTransaction transaction = new StockTransaction(
+                                    item.getBouquetId(),
+                                    item.getBouquetName(),
+                                    StockTransaction.TransactionType.ORDER_FULFILLMENT,
+                                    -quantityUsed, // Negative because stock is being used
+                                    currentStock,
+                                    newStock,
+                                    "Order fulfilled: " + order.getFormattedOrderId(),
+                                    adminId,
+                                    adminName
+                                );
+                                transaction.setOrderId(order.getId());
+                                
+                                db.collection("stock_transactions")
+                                    .add(transaction)
+                                    .addOnFailureListener(e -> {
+                                        // Log error but don't show to user
+                                        e.printStackTrace();
+                                    });
+                            });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update stock for " + item.getBouquetName(), 
+                        Toast.LENGTH_SHORT).show();
+                });
+        }
     }
 
     @Override
