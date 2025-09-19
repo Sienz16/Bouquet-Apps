@@ -15,6 +15,7 @@ import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.user.dashboard.UserDashboardActivity;
 import com.example.bouquetbliss.user.browse.BrowseBouquetsActivity;
 import com.example.bouquetbliss.user.orders.UserOrdersActivity;
+import com.example.bouquetbliss.user.favorites.UserFavoritesActivity;
 import com.example.bouquetbliss.common.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -115,24 +116,36 @@ public abstract class BaseUserNavigationActivity extends AppCompatActivity {
     }
 
     private void showProfileMenu() {
-        String[] options = {"View Profile", "Settings", "Logout"};
+        String[] options = {"My Favorites", "View Profile", "Settings", "Logout"};
         
         new AlertDialog.Builder(this)
                 .setTitle("Profile Options")
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
-                        case 0: // View Profile
+                        case 0: // My Favorites
+                            navigateToFavorites();
+                            break;
+                        case 1: // View Profile
                             navigateToProfile();
                             break;
-                        case 1: // Settings
+                        case 2: // Settings
                             Toast.makeText(this, "Settings coming soon!", Toast.LENGTH_SHORT).show();
                             break;
-                        case 2: // Logout
+                        case 3: // Logout
                             showLogoutConfirmation();
                             break;
                     }
                 })
                 .show();
+    }
+
+    private void navigateToFavorites() {
+        if (!(this instanceof UserFavoritesActivity)) {
+            Intent intent = new Intent(this, UserFavoritesActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "You're already viewing favorites", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void navigateToProfile() {
