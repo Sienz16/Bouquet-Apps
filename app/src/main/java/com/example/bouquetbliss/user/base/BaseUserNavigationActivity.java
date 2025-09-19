@@ -136,7 +136,8 @@ public abstract class BaseUserNavigationActivity extends AppCompatActivity {
     }
 
     private void navigateToProfile() {
-        Toast.makeText(this, "Profile module coming soon!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, com.example.bouquetbliss.user.profile.UserProfileActivity.class);
+        startActivity(intent);
     }
 
     private void showLogoutConfirmation() {
