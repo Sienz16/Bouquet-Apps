@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.models.Order;
+import com.example.bouquetbliss.utils.TranslationManager;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ public class UserOrderHistoryAdapter extends RecyclerView.Adapter<UserOrderHisto
     private OnOrderClickListener listener;
     private SimpleDateFormat dateFormat;
     private Context context;
+    private TranslationManager translationManager;
 
     public UserOrderHistoryAdapter(List<Order> orderList, OnOrderClickListener listener) {
         this.orderList = orderList;
@@ -42,6 +44,9 @@ public class UserOrderHistoryAdapter extends RecyclerView.Adapter<UserOrderHisto
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
+        if (translationManager == null) {
+            translationManager = TranslationManager.getInstance(context);
+        }
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_user_order_history, parent, false);
         return new ViewHolder(view);
@@ -86,13 +91,28 @@ public class UserOrderHistoryAdapter extends RecyclerView.Adapter<UserOrderHisto
             tvDeliveryDate.setText("Delivery: " + dateFormat.format(new Date(order.getDeliveryDate())));
             tvOrderAmount.setText(String.format("RM %.2f", order.getTotalAmount()));
             
-            // Set item count
+            // Set item count with translation
             int itemCount = order.getItems() != null ? order.getItems().size() : 0;
-            tvItemCount.setText(itemCount + " item" + (itemCount != 1 ? "s" : ""));
+            String itemText = itemCount + " item" + (itemCount != 1 ? "s" : "");
             
-            // Set status and color
-            tvOrderStatus.setText(getStatusDisplayText(order.getStatus()));
-            tvStatusDescription.setText(getStatusDescription(order.getStatus()));
+            if (translationManager != null) {
+                translationManager.translateAndSetText(tvItemCount, itemText);
+            } else {
+                tvItemCount.setText(itemText);
+            }
+            
+            // Set status and color with translation
+            String statusText = getStatusDisplayText(order.getStatus());
+            String statusDesc = getStatusDescription(order.getStatus());
+            
+            if (translationManager != null) {
+                translationManager.translateAndSetText(tvOrderStatus, statusText);
+                translationManager.translateAndSetText(tvStatusDescription, statusDesc);
+            } else {
+                tvOrderStatus.setText(statusText);
+                tvStatusDescription.setText(statusDesc);
+            }
+            
             setStatusColor(order.getStatus());
             
             // Set click listener

@@ -38,6 +38,9 @@ public class UserDashboardActivity extends BaseUserNavigationActivity {
         setupUserBottomNavigation();
         setSelectedNavItem("home");
         
+        // Apply translations
+        applyTranslations();
+        
         // Load real user statistics
         loadUserStatistics();
     }

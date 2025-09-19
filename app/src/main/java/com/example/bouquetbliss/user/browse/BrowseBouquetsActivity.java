@@ -53,6 +53,9 @@ public class BrowseBouquetsActivity extends BaseUserNavigationActivity {
         setSelectedNavItem("browse");
         loadFavorites();
         loadBouquets();
+        
+        // Apply translations
+        applyTranslations();
     }
 
     private void setupRecyclerView() {

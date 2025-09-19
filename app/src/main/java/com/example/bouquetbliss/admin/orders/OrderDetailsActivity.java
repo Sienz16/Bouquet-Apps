@@ -150,6 +150,15 @@ public class OrderDetailsActivity extends BaseAdminNavigationActivity {
         } else {
             binding.layoutSpecialInstructions.setVisibility(View.GONE);
         }
+
+        // Flower color preference
+        if (currentOrder.getFlowerColorPreference() != null && 
+            !currentOrder.getFlowerColorPreference().trim().isEmpty()) {
+            binding.tvFlowerColorPreference.setText(currentOrder.getFlowerColorPreference());
+            binding.layoutFlowerColorPreference.setVisibility(View.VISIBLE);
+        } else {
+            binding.layoutFlowerColorPreference.setVisibility(View.GONE);
+        }
         
         // Rejection reason
         if (currentOrder.getRejectionReason() != null && 

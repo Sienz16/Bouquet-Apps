@@ -1,6 +1,7 @@
 package com.example.bouquetbliss.admin.base;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -18,9 +19,26 @@ import com.example.bouquetbliss.admin.profile.AdminProfileActivity;
 import com.example.bouquetbliss.admin.reports.ReportsActivity;
 import com.example.bouquetbliss.admin.stock.StockManagementActivity;
 import com.example.bouquetbliss.common.auth.LoginActivity;
+import com.example.bouquetbliss.utils.UITranslator;
 import com.google.firebase.auth.FirebaseAuth;
 
 public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
+
+    protected UITranslator uiTranslator;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        uiTranslator = new UITranslator(this);
+    }
+
+    protected void applyTranslations() {
+        // Apply translations to the current activity
+        uiTranslator.translateActivity();
+        
+        // Preload common translations for better performance
+        uiTranslator.translateCommonElements();
+    }
 
     protected void setupAdminBottomNavigation() {
         LinearLayout navHome = findViewById(R.id.navHome);

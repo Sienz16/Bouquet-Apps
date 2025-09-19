@@ -51,6 +51,9 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
         setupUserBottomNavigation();
         setSelectedNavItem("orders");
         
+        // Apply translations
+        applyTranslations();
+        
         loadOrderDetails();
     }
 

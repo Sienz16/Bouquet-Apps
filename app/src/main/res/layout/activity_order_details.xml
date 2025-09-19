@@ -417,6 +417,50 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Flower Color Preference (if any) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layoutFlowerColorPreference"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Flower Color Preference"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="12dp"
+                        android:drawableStart="@android:drawable/ic_menu_gallery"
+                        android:drawableTint="@color/pink_primary"
+                        android:drawablePadding="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvFlowerColorPreference"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Red roses with white accents"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:background="@drawable/reason_background"
+                        android:backgroundTint="@color/pink_light"
+                        android:padding="12dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Rejection Reason (if rejected) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/layoutRejectionReason"
