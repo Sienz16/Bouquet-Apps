@@ -11,21 +11,26 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.example.bouquetbliss.databinding.ActivityBrowseBouquetsBinding;
 import com.example.bouquetbliss.models.Bouquet;
+import com.example.bouquetbliss.repository.FavoriteRepository;
 import com.example.bouquetbliss.user.base.BaseUserNavigationActivity;
 import com.example.bouquetbliss.user.detail.BouquetDetailActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BrowseBouquetsActivity extends BaseUserNavigationActivity {
 
     private ActivityBrowseBouquetsBinding binding;
     private FirebaseFirestore db;
     private BrowseBouquetsAdapter adapter;
+    private FavoriteRepository favoriteRepository;
     private List<Bouquet> bouquetList;
     private List<Bouquet> filteredBouquetList;
+    private Set<String> favoriteIds;
     private String currentSearchQuery = "";
     private String currentCategoryFilter = "All";
     private String currentSizeFilter = "All";
@@ -37,13 +42,16 @@ public class BrowseBouquetsActivity extends BaseUserNavigationActivity {
         setContentView(binding.getRoot());
 
         db = FirebaseFirestore.getInstance();
+        favoriteRepository = new FavoriteRepository();
         bouquetList = new ArrayList<>();
         filteredBouquetList = new ArrayList<>();
+        favoriteIds = new HashSet<>();
 
         setupRecyclerView();
         setupSearchAndFilter();
         setupUserBottomNavigation();
         setSelectedNavItem("browse");
+        loadFavorites();
         loadBouquets();
     }
 
@@ -233,6 +241,31 @@ public class BrowseBouquetsActivity extends BaseUserNavigationActivity {
         }
         
         startActivity(intent);
+    }
+
+    private void loadFavorites() {
+        favoriteRepository.getUserFavorites(new FavoriteRepository.FavoritesListCallback() {
+            @Override
+            public void onSuccess(List<String> bouquetIds) {
+                favoriteIds.clear();
+                favoriteIds.addAll(bouquetIds);
+                if (adapter != null) {
+                    adapter.updateFavorites(favoriteIds);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                // Silently handle error - favorites are optional
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh favorites when returning to this activity
+        loadFavorites();
     }
 
     @Override

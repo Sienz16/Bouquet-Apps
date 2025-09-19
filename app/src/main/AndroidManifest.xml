@@ -97,6 +97,11 @@
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
+        <activity
+            android:name=".user.favorites.UserFavoritesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
         <!-- Registration Activity -->
         <activity
             android:name=".common.auth.RegisterActivity"
