@@ -42,6 +42,9 @@ public class UserFavoritesActivity extends BaseUserNavigationActivity {
         setupRecyclerView();
         setupUserBottomNavigation();
         setSelectedNavItem("favorites");
+        
+        // Apply translations
+        applyTranslations();
     }
 
     private void setupRecyclerView() {

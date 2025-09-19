@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.models.OrderItem;
+import com.example.bouquetbliss.utils.TranslationManager;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
@@ -25,6 +26,7 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
     private List<Order> orderList;
     private OnOrderClickListener listener;
     private SimpleDateFormat dateFormat;
+    private TranslationManager translationManager;
 
     public interface OnOrderClickListener {
         void onOrderClick(Order order);
@@ -34,6 +36,12 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
         this.orderList = orderList;
         this.listener = listener;
         this.dateFormat = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a", Locale.getDefault());
+    }
+    
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        translationManager = TranslationManager.getInstance(recyclerView.getContext());
     }
 
     @NonNull
@@ -113,50 +121,57 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
         }
 
         private void setOrderStatus(String status, Context context) {
+            String statusText;
+            int colorRes, iconRes;
+            
             switch (status.toLowerCase()) {
                 case "pending":
-                    textOrderStatus.setText("Pending Review");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.warning));
-                    iconStatus.setImageResource(android.R.drawable.ic_menu_recent_history);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.warning));
+                    statusText = "Pending Review";
+                    colorRes = R.color.warning;
+                    iconRes = android.R.drawable.ic_menu_recent_history;
                     break;
                 case "approved":
-                    textOrderStatus.setText("Approved");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.info));
-                    iconStatus.setImageResource(android.R.drawable.ic_menu_agenda);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.info));
+                    statusText = "Approved";
+                    colorRes = R.color.info;
+                    iconRes = android.R.drawable.ic_menu_agenda;
                     break;
                 case "in_preparation":
-                    textOrderStatus.setText("In Preparation");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.pink_primary));
-                    iconStatus.setImageResource(android.R.drawable.ic_popup_sync);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.pink_primary));
+                    statusText = "In Preparation";
+                    colorRes = R.color.pink_primary;
+                    iconRes = android.R.drawable.ic_popup_sync;
                     break;
                 case "ready":
-                    textOrderStatus.setText("Ready for Pickup");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.success));
-                    iconStatus.setImageResource(android.R.drawable.ic_menu_compass);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.success));
+                    statusText = "Ready for Pickup";
+                    colorRes = R.color.success;
+                    iconRes = android.R.drawable.ic_menu_compass;
                     break;
                 case "completed":
-                    textOrderStatus.setText("Completed");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.success));
-                    iconStatus.setImageResource(android.R.drawable.ic_menu_compass);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.success));
+                    statusText = "Completed";
+                    colorRes = R.color.success;
+                    iconRes = android.R.drawable.ic_menu_compass;
                     break;
                 case "rejected":
-                    textOrderStatus.setText("Rejected");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.error));
-                    iconStatus.setImageResource(android.R.drawable.ic_delete);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.error));
+                    statusText = "Rejected";
+                    colorRes = R.color.error;
+                    iconRes = android.R.drawable.ic_delete;
                     break;
                 default:
-                    textOrderStatus.setText("Unknown");
-                    textOrderStatus.setTextColor(context.getResources().getColor(R.color.text_secondary));
-                    iconStatus.setImageResource(android.R.drawable.ic_menu_help);
-                    iconStatus.setColorFilter(context.getResources().getColor(R.color.text_secondary));
+                    statusText = "Unknown";
+                    colorRes = R.color.text_secondary;
+                    iconRes = android.R.drawable.ic_menu_help;
                     break;
             }
+            
+            // Apply translation if available
+            if (translationManager != null) {
+                translationManager.translateAndSetText(textOrderStatus, statusText);
+            } else {
+                textOrderStatus.setText(statusText);
+            }
+            
+            textOrderStatus.setTextColor(context.getResources().getColor(colorRes));
+            iconStatus.setImageResource(iconRes);
+            iconStatus.setColorFilter(context.getResources().getColor(colorRes));
         }
     }
 }

@@ -51,6 +51,9 @@ public class UserOrderHistoryActivity extends BaseUserNavigationActivity {
         setupClickListeners();
         setupUserBottomNavigation();
         setSelectedNavItem("orders");
+        
+        // Apply translations
+        applyTranslations();
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {

@@ -41,6 +41,9 @@ public class UserOrdersActivity extends BaseUserNavigationActivity {
         setupUserBottomNavigation();
         setSelectedNavItem("orders");
         
+        // Apply translations
+        applyTranslations();
+        
         if (auth.getCurrentUser() != null) {
             loadUserOrders();
         } else {

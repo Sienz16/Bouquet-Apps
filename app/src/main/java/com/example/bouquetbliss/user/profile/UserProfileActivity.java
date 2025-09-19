@@ -6,7 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -47,6 +51,9 @@ public class UserProfileActivity extends BaseUserNavigationActivity {
         setupUserBottomNavigation();
         setSelectedNavItem("profile");
         loadUserProfile();
+        
+        // Apply translations after UI is set up
+        applyTranslations();
     }
 
     private void setupImagePicker() {
@@ -72,6 +79,8 @@ public class UserProfileActivity extends BaseUserNavigationActivity {
         binding.btnEditPhone.setOnClickListener(v -> showEditPhoneDialog());
 
         binding.btnEditName.setOnClickListener(v -> showEditNameDialog());
+
+        binding.btnEditAddress.setOnClickListener(v -> showEditAddressDialog());
     }
 
     private void loadUserProfile() {
@@ -95,6 +104,12 @@ public class UserProfileActivity extends BaseUserNavigationActivity {
                         String phoneNumber = documentSnapshot.getString("phoneNumber");
                         String fullName = documentSnapshot.getString("fullName");
                         
+                        // Address fields
+                        String streetAddress = documentSnapshot.getString("streetAddress");
+                        String city = documentSnapshot.getString("city");
+                        String state = documentSnapshot.getString("state");
+                        String postalCode = documentSnapshot.getString("postalCode");
+                        
                         if (phoneNumber != null && !phoneNumber.isEmpty()) {
                             binding.tvPhoneNumber.setText(phoneNumber);
                         } else {
@@ -105,6 +120,9 @@ public class UserProfileActivity extends BaseUserNavigationActivity {
                             binding.tvFullName.setText(fullName);
                             binding.tvUserName.setText(fullName);
                         }
+                        
+                        // Update address display
+                        updateAddressDisplay(streetAddress, city, state, postalCode);
                     } else {
                         // Create user document if it doesn't exist
                         createUserDocument();
@@ -260,6 +278,136 @@ public class UserProfileActivity extends BaseUserNavigationActivity {
                         Toast.makeText(this, "Failed to update name: " + task.getException().getMessage(), 
                             Toast.LENGTH_SHORT).show();
                     }
+                });
+        }
+    }
+
+    private void updateAddressDisplay(String streetAddress, String city, String state, String postalCode) {
+        StringBuilder address = new StringBuilder();
+        
+        if (streetAddress != null && !streetAddress.trim().isEmpty()) {
+            address.append(streetAddress);
+        }
+        
+        if (city != null && !city.trim().isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(city);
+        }
+        
+        if (postalCode != null && !postalCode.trim().isEmpty()) {
+            if (address.length() > 0) address.append(" ");
+            address.append(postalCode);
+        }
+        
+        if (state != null && !state.trim().isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(state);
+        }
+        
+        if (address.length() > 0) {
+            binding.tvAddress.setText(address.toString());
+        } else {
+            binding.tvAddress.setText("No address set");
+        }
+    }
+
+    private void showEditAddressDialog() {
+        // Create custom dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_address, null);
+        
+        EditText etStreetAddress = dialogView.findViewById(R.id.etStreetAddress);
+        EditText etCity = dialogView.findViewById(R.id.etCity);
+        EditText etPostalCode = dialogView.findViewById(R.id.etPostalCode);
+        Spinner spinnerState = dialogView.findViewById(R.id.spinnerState);
+        
+        // Setup state spinner with only Penang and Kedah
+        String[] states = {"Select State", "Penang", "Kedah"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, states);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerState.setAdapter(adapter);
+        
+        // Load current address data if exists
+        if (currentUser != null) {
+            db.collection("users").document(currentUser.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String streetAddress = documentSnapshot.getString("streetAddress");
+                        String city = documentSnapshot.getString("city");
+                        String state = documentSnapshot.getString("state");
+                        String postalCode = documentSnapshot.getString("postalCode");
+                        
+                        if (streetAddress != null) etStreetAddress.setText(streetAddress);
+                        if (city != null) etCity.setText(city);
+                        if (postalCode != null) etPostalCode.setText(postalCode);
+                        
+                        // Set spinner selection
+                        if (state != null) {
+                            for (int i = 0; i < states.length; i++) {
+                                if (states[i].equals(state)) {
+                                    spinnerState.setSelection(i);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+        }
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Edit Address")
+            .setView(dialogView)
+            .setPositiveButton("Save", (dialog, which) -> {
+                String streetAddress = etStreetAddress.getText().toString().trim();
+                String city = etCity.getText().toString().trim();
+                String postalCode = etPostalCode.getText().toString().trim();
+                String selectedState = spinnerState.getSelectedItem().toString();
+                
+                // Validation
+                if (streetAddress.isEmpty()) {
+                    Toast.makeText(this, "Street address is required", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                if (city.isEmpty()) {
+                    Toast.makeText(this, "City is required", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                if (postalCode.isEmpty()) {
+                    Toast.makeText(this, "Postal code is required", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                if (selectedState.equals("Select State")) {
+                    Toast.makeText(this, "Please select a state", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                updateAddress(streetAddress, city, selectedState, postalCode);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void updateAddress(String streetAddress, String city, String state, String postalCode) {
+        if (currentUser != null) {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("streetAddress", streetAddress);
+            updates.put("city", city);
+            updates.put("state", state);
+            updates.put("postalCode", postalCode);
+            updates.put("updatedAt", System.currentTimeMillis());
+
+            db.collection("users").document(currentUser.getUid())
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    updateAddressDisplay(streetAddress, city, state, postalCode);
+                    Toast.makeText(this, "Address updated successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to update address: " + e.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
                 });
         }
     }

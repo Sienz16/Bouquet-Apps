@@ -16,6 +16,7 @@ import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.admin.dashboard.AdminDashboardActivity;
 import com.example.bouquetbliss.databinding.ActivityAuthLoginBinding;
 import com.example.bouquetbliss.models.User;
+import com.example.bouquetbliss.utils.UITranslator;
 import com.example.bouquetbliss.user.dashboard.UserDashboardActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -34,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityAuthLoginBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private UITranslator uiTranslator;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,10 @@ public class LoginActivity extends AppCompatActivity {
         
         setupClickListeners();
         setupAnimations();
+        
+        // Initialize translator and apply translations
+        uiTranslator = new UITranslator(this);
+        applyTranslations();
     }
     
     private void setupClickListeners() {
@@ -303,5 +309,15 @@ public class LoginActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+    
+    private void applyTranslations() {
+        if (uiTranslator != null) {
+            // Apply translations to the current activity
+            uiTranslator.translateActivity();
+            
+            // Preload common translations for better performance
+            uiTranslator.translateCommonElements();
+        }
     }
 }

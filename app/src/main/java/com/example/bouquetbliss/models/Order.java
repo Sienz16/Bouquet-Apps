@@ -16,6 +16,7 @@ public class Order {
     private long deliveryDate;
     private String deliveryAddress;
     private String specialInstructions;
+    private String flowerColorPreference; // User's preferred flower colors
     private String rejectionReason;
     private long createdAt;
     private long updatedAt;
@@ -24,7 +25,8 @@ public class Order {
     public Order() {}
 
     public Order(String customerId, String customerName, String customerPhone, String customerEmail,
-                 List<OrderItem> items, double totalAmount, long deliveryDate, String deliveryAddress) {
+                 List<OrderItem> items, double totalAmount, long deliveryDate, String deliveryAddress, 
+                 String specialInstructions, String flowerColorPreference) {
         this.customerId = customerId;
         this.customerName = customerName;
         this.customerPhone = customerPhone;
@@ -33,6 +35,8 @@ public class Order {
         this.totalAmount = totalAmount;
         this.deliveryDate = deliveryDate;
         this.deliveryAddress = deliveryAddress;
+        this.specialInstructions = specialInstructions;
+        this.flowerColorPreference = flowerColorPreference;
         this.status = "pending";
         this.preparationStatus = "not_started";
         this.orderDate = System.currentTimeMillis();
@@ -102,6 +106,9 @@ public class Order {
 
     public String getSpecialInstructions() { return specialInstructions; }
     public void setSpecialInstructions(String specialInstructions) { this.specialInstructions = specialInstructions; }
+
+    public String getFlowerColorPreference() { return flowerColorPreference; }
+    public void setFlowerColorPreference(String flowerColorPreference) { this.flowerColorPreference = flowerColorPreference; }
 
     public String getRejectionReason() { return rejectionReason; }
     public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }

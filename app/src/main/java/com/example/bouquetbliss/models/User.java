@@ -31,6 +31,13 @@ public class User {
     private String phoneNumber;
     private UserType userType;
     private String profileImageUrl;
+    
+    // Address fields
+    private String streetAddress;
+    private String city;
+    private String state; // Only "Penang" or "Kedah"
+    private String postalCode;
+    
     private long createdAt;
     private long updatedAt;
     
@@ -116,6 +123,46 @@ public class User {
         this.updatedAt = updatedAt;
     }
     
+    // Address getters and setters
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+    
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
+    public String getCity() {
+        return city;
+    }
+    
+    public void setCity(String city) {
+        this.city = city;
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
+    public String getState() {
+        return state;
+    }
+    
+    public void setState(String state) {
+        // Only allow Penang or Kedah
+        if ("Penang".equals(state) || "Kedah".equals(state)) {
+            this.state = state;
+            this.updatedAt = System.currentTimeMillis();
+        }
+    }
+    
+    public String getPostalCode() {
+        return postalCode;
+    }
+    
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
     // Helper methods
     public boolean isAdmin() {
         return userType == UserType.ADMIN;
@@ -123,6 +170,48 @@ public class User {
     
     public boolean isRegularUser() {
         return userType == UserType.USER;
+    }
+    
+    public String getFormattedAddress() {
+        StringBuilder address = new StringBuilder();
+        
+        if (streetAddress != null && !streetAddress.trim().isEmpty()) {
+            address.append(streetAddress);
+        }
+        
+        if (city != null && !city.trim().isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(city);
+        }
+        
+        if (postalCode != null && !postalCode.trim().isEmpty()) {
+            if (address.length() > 0) address.append(" ");
+            address.append(postalCode);
+        }
+        
+        if (state != null && !state.trim().isEmpty()) {
+            if (address.length() > 0) address.append(", ");
+            address.append(state);
+        }
+        
+        return address.length() > 0 ? address.toString() : "No address set";
+    }
+    
+    public boolean hasCompleteAddress() {
+        return streetAddress != null && !streetAddress.trim().isEmpty() &&
+               city != null && !city.trim().isEmpty() &&
+               state != null && !state.trim().isEmpty() &&
+               postalCode != null && !postalCode.trim().isEmpty();
+    }
+    
+    // State constants
+    public static class States {
+        public static final String PENANG = "Penang";
+        public static final String KEDAH = "Kedah";
+        
+        public static String[] getAllStates() {
+            return new String[]{PENANG, KEDAH};
+        }
     }
     
     @Override

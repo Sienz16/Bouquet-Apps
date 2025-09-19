@@ -1,6 +1,7 @@
 package com.example.bouquetbliss.user.base;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,9 +18,28 @@ import com.example.bouquetbliss.user.browse.BrowseBouquetsActivity;
 import com.example.bouquetbliss.user.orders.UserOrdersActivity;
 import com.example.bouquetbliss.user.favorites.UserFavoritesActivity;
 import com.example.bouquetbliss.common.auth.LoginActivity;
+import com.example.bouquetbliss.utils.TranslationManager;
+import com.example.bouquetbliss.utils.UITranslator;
+import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.firebase.auth.FirebaseAuth;
 
 public abstract class BaseUserNavigationActivity extends AppCompatActivity {
+
+    protected UITranslator uiTranslator;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        uiTranslator = new UITranslator(this);
+    }
+
+    protected void applyTranslations() {
+        // Apply translations to the current activity
+        uiTranslator.translateActivity();
+        
+        // Preload common translations for better performance
+        uiTranslator.translateCommonElements();
+    }
 
     protected void setupUserBottomNavigation() {
         LinearLayout navHome = findViewById(R.id.navHome);
@@ -116,27 +136,134 @@ public abstract class BaseUserNavigationActivity extends AppCompatActivity {
     }
 
     private void showProfileMenu() {
-        String[] options = {"My Favorites", "View Profile", "Settings", "Logout"};
+        String[] originalOptions = {"My Favorites", "View Profile", "Language", "Logout"};
+        String originalTitle = "Profile Options";
         
-        new AlertDialog.Builder(this)
-                .setTitle("Profile Options")
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0: // My Favorites
-                            navigateToFavorites();
-                            break;
-                        case 1: // View Profile
-                            navigateToProfile();
-                            break;
-                        case 2: // Settings
-                            Toast.makeText(this, "Settings coming soon!", Toast.LENGTH_SHORT).show();
-                            break;
-                        case 3: // Logout
-                            showLogoutConfirmation();
-                            break;
+        TranslationManager translationManager = TranslationManager.getInstance(this);
+        
+        if (translationManager.getCurrentLanguage().equals(TranslateLanguage.ENGLISH)) {
+            // Show in English
+            new AlertDialog.Builder(this)
+                    .setTitle(originalTitle)
+                    .setItems(originalOptions, (dialog, which) -> {
+                        switch (which) {
+                            case 0: // My Favorites
+                                navigateToFavorites();
+                                break;
+                            case 1: // View Profile
+                                navigateToProfile();
+                                break;
+                            case 2: // Language
+                                showLanguageSelectionDialog();
+                                break;
+                            case 3: // Logout
+                                showLogoutConfirmation();
+                                break;
+                        }
+                    })
+                    .show();
+        } else {
+            // Translate and show in Malay
+            String[] translatedOptions = new String[originalOptions.length];
+            final int[] translatedCount = {0};
+            
+            // Translate title
+            translationManager.translateText(originalTitle, new TranslationManager.TranslationCallback() {
+                @Override
+                public void onTranslated(String translatedTitle) {
+                    // Translate each option
+                    for (int i = 0; i < originalOptions.length; i++) {
+                        final int index = i;
+                        translationManager.translateText(originalOptions[i], new TranslationManager.TranslationCallback() {
+                            @Override
+                            public void onTranslated(String translatedOption) {
+                                translatedOptions[index] = translatedOption;
+                                translatedCount[0]++;
+                                
+                                // Show dialog when all translations are complete
+                                if (translatedCount[0] == originalOptions.length) {
+                                    runOnUiThread(() -> {
+                                        new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                                                .setTitle(translatedTitle)
+                                                .setItems(translatedOptions, (dialog, which) -> {
+                                                    switch (which) {
+                                                        case 0: // My Favorites
+                                                            navigateToFavorites();
+                                                            break;
+                                                        case 1: // View Profile
+                                                            navigateToProfile();
+                                                            break;
+                                                        case 2: // Language
+                                                            showLanguageSelectionDialog();
+                                                            break;
+                                                        case 3: // Logout
+                                                            showLogoutConfirmation();
+                                                            break;
+                                                    }
+                                                })
+                                                .show();
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                translatedOptions[index] = originalOptions[index]; // Fallback to original
+                                translatedCount[0]++;
+                                
+                                if (translatedCount[0] == originalOptions.length) {
+                                    runOnUiThread(() -> {
+                                        new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                                                .setTitle(translatedTitle)
+                                                .setItems(translatedOptions, (dialog, which) -> {
+                                                    switch (which) {
+                                                        case 0: // My Favorites
+                                                            navigateToFavorites();
+                                                            break;
+                                                        case 1: // View Profile
+                                                            navigateToProfile();
+                                                            break;
+                                                        case 2: // Language
+                                                            showLanguageSelectionDialog();
+                                                            break;
+                                                        case 3: // Logout
+                                                            showLogoutConfirmation();
+                                                            break;
+                                                    }
+                                                })
+                                                .show();
+                                    });
+                                }
+                            }
+                        });
                     }
-                })
-                .show();
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Fallback to English if title translation fails
+                    new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                            .setTitle(originalTitle)
+                            .setItems(originalOptions, (dialog, which) -> {
+                                switch (which) {
+                                    case 0: // My Favorites
+                                        navigateToFavorites();
+                                        break;
+                                    case 1: // View Profile
+                                        navigateToProfile();
+                                        break;
+                                    case 2: // Language
+                                        showLanguageSelectionDialog();
+                                        break;
+                                    case 3: // Logout
+                                        showLogoutConfirmation();
+                                        break;
+                                }
+                            })
+                            .show();
+                }
+            });
+        }
     }
 
     private void navigateToFavorites() {
@@ -169,5 +296,118 @@ public abstract class BaseUserNavigationActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
         Toast.makeText(this, "Successfully logged out", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showLanguageSelectionDialog() {
+        TranslationManager translationManager = TranslationManager.getInstance(this);
+        
+        String[] languages = translationManager.getAvailableLanguages();
+        String[] languageCodes = translationManager.getAvailableLanguageCodes();
+        
+        // Find current selection
+        final int currentSelection;
+        String currentLanguage = translationManager.getCurrentLanguage();
+        int tempSelection = 0;
+        for (int i = 0; i < languageCodes.length; i++) {
+            if (languageCodes[i].equals(currentLanguage)) {
+                tempSelection = i;
+                break;
+            }
+        }
+        currentSelection = tempSelection;
+        
+        String dialogTitle = "Select Language";
+        String cancelButton = "Cancel";
+        String changeMessage = "Language changed to ";
+        
+        if (translationManager.getCurrentLanguage().equals(TranslateLanguage.ENGLISH)) {
+            // Show in English
+            new AlertDialog.Builder(this)
+                    .setTitle(dialogTitle)
+                    .setSingleChoiceItems(languages, currentSelection, (dialog, which) -> {
+                        String selectedLanguageCode = languageCodes[which];
+                        translationManager.setLanguage(selectedLanguageCode);
+                        
+                        Toast.makeText(this, changeMessage + languages[which], Toast.LENGTH_SHORT).show();
+                        
+                        // Restart activity to apply language changes
+                        recreate();
+                        
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton(cancelButton, null)
+                    .show();
+        } else {
+            // Translate and show dialog elements
+            translationManager.translateText(dialogTitle, new TranslationManager.TranslationCallback() {
+                @Override
+                public void onTranslated(String translatedTitle) {
+                    translationManager.translateText(cancelButton, new TranslationManager.TranslationCallback() {
+                        @Override
+                        public void onTranslated(String translatedCancel) {
+                            runOnUiThread(() -> {
+                                new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                                        .setTitle(translatedTitle)
+                                        .setSingleChoiceItems(languages, currentSelection, (dialog, which) -> {
+                                            String selectedLanguageCode = languageCodes[which];
+                                            translationManager.setLanguage(selectedLanguageCode);
+                                            
+                                            Toast.makeText(BaseUserNavigationActivity.this, changeMessage + languages[which], Toast.LENGTH_SHORT).show();
+                                            
+                                            // Restart activity to apply language changes
+                                            recreate();
+                                            
+                                            dialog.dismiss();
+                                        })
+                                        .setNegativeButton(translatedCancel, null)
+                                        .show();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            // Fallback to English
+                            runOnUiThread(() -> {
+                                new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                                        .setTitle(dialogTitle)
+                                        .setSingleChoiceItems(languages, currentSelection, (dialog, which) -> {
+                                            String selectedLanguageCode = languageCodes[which];
+                                            translationManager.setLanguage(selectedLanguageCode);
+                                            
+                                            Toast.makeText(BaseUserNavigationActivity.this, changeMessage + languages[which], Toast.LENGTH_SHORT).show();
+                                            
+                                            recreate();
+                                            
+                                            dialog.dismiss();
+                                        })
+                                        .setNegativeButton(cancelButton, null)
+                                        .show();
+                            });
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Fallback to English
+                    runOnUiThread(() -> {
+                        new AlertDialog.Builder(BaseUserNavigationActivity.this)
+                                .setTitle(dialogTitle)
+                                .setSingleChoiceItems(languages, currentSelection, (dialog, which) -> {
+                                    String selectedLanguageCode = languageCodes[which];
+                                    translationManager.setLanguage(selectedLanguageCode);
+                                    
+                                    Toast.makeText(BaseUserNavigationActivity.this, changeMessage + languages[which], Toast.LENGTH_SHORT).show();
+                                    
+                                    recreate();
+                                    
+                                    dialog.dismiss();
+                                })
+                                .setNegativeButton(cancelButton, null)
+                                .show();
+                    });
+                }
+            });
+        }
     }
 }

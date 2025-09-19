@@ -2,6 +2,9 @@ package com.example.bouquetbliss.user.detail;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -24,6 +27,8 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
     private FirebaseAuth auth;
     private Bouquet currentBouquet;
     private int selectedQuantity = 1;
+    private String flowerColorPreference = "";
+    private String specialInstructions = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,9 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
         // Get bouquet data from intent
         getBouquetFromIntent();
         setupClickListeners();
+        
+        // Apply translations
+        applyTranslations();
     }
 
     private void getBouquetFromIntent() {
@@ -181,19 +189,54 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
             return;
         }
 
+        // First show order customization dialog
+        showOrderCustomizationDialog();
+    }
+
+    private void showOrderCustomizationDialog() {
+        // Create custom dialog layout
+        View dialogView = LayoutInflater.from(this).inflate(com.example.bouquetbliss.R.layout.dialog_order_customization, null);
+        
+        EditText etFlowerColor = dialogView.findViewById(com.example.bouquetbliss.R.id.etFlowerColor);
+        EditText etSpecialInstructions = dialogView.findViewById(com.example.bouquetbliss.R.id.etSpecialInstructions);
+        
+        // Pre-fill with existing values if any
+        etFlowerColor.setText(flowerColorPreference);
+        etSpecialInstructions.setText(specialInstructions);
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Customize Your Order")
+                .setView(dialogView)
+                .setPositiveButton("Continue", (dialog, which) -> {
+                    flowerColorPreference = etFlowerColor.getText().toString().trim();
+                    specialInstructions = etSpecialInstructions.getText().toString().trim();
+                    showOrderConfirmationDialog();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showOrderConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Confirm Order Request");
         
-        String message = String.format(
-            "Bouquet: %s\nQuantity: %d\nTotal Price: RM %.2f\n\nDo you want to submit this order request?",
-            currentBouquet.getName(),
-            selectedQuantity,
-            currentBouquet.getPrice() * selectedQuantity
-        );
+        StringBuilder message = new StringBuilder();
+        message.append(String.format("Bouquet: %s\nQuantity: %d\nTotal Price: RM %.2f", 
+                currentBouquet.getName(), selectedQuantity, currentBouquet.getPrice() * selectedQuantity));
         
-        builder.setMessage(message)
+        if (!flowerColorPreference.isEmpty()) {
+            message.append("\nFlower Colors: ").append(flowerColorPreference);
+        }
+        
+        if (!specialInstructions.isEmpty()) {
+            message.append("\nSpecial Instructions: ").append(specialInstructions);
+        }
+        
+        message.append("\n\nDo you want to submit this order request?");
+        
+        builder.setMessage(message.toString())
                 .setPositiveButton("Submit Request", (dialog, which) -> submitOrderRequest())
-                .setNegativeButton("Cancel", null);
+                .setNegativeButton("Back", (dialog, which) -> showOrderCustomizationDialog());
         
         builder.show();
     }
@@ -235,7 +278,9 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
                 orderItems,
                 currentBouquet.getPrice() * selectedQuantity,
                 System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000), // Delivery date: 7 days from now
-                "To be confirmed" // Delivery address - to be collected later
+                "To be confirmed", // Delivery address - to be collected later
+                specialInstructions, // Special instructions
+                flowerColorPreference // Flower color preference
         );
 
         // Submit to Firebase

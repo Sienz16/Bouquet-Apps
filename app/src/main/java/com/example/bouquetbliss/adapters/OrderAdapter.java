@@ -14,6 +14,7 @@ import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.databinding.ItemOrderAdminBinding;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.models.OrderItem;
+import com.example.bouquetbliss.utils.TranslationManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,6 +26,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     private List<Order> orderList;
     private OnOrderActionListener listener;
     private Context context;
+    private TranslationManager translationManager;
 
     public interface OnOrderActionListener {
         void onViewDetails(Order order);
@@ -42,6 +44,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
+        if (translationManager == null) {
+            translationManager = TranslationManager.getInstance(context);
+        }
         ItemOrderAdminBinding binding = ItemOrderAdminBinding.inflate(
             LayoutInflater.from(context), parent, false);
         return new OrderViewHolder(binding);
@@ -144,7 +149,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     break;
             }
 
-            binding.tvOrderStatus.setText(statusText);
+            // Apply translation if available
+            if (translationManager != null) {
+                translationManager.translateAndSetText(binding.tvOrderStatus, statusText);
+            } else {
+                binding.tvOrderStatus.setText(statusText);
+            }
             binding.tvOrderStatus.setBackgroundColor(statusColor);
         }
 

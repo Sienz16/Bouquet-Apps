@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Personalize your bouquet order"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="20dp"
+        android:gravity="center" />
+
+    <!-- Flower Color Preference -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/pink_primary"
+        app:hintTextColor="@color/pink_primary"
+        app:startIconDrawable="@android:drawable/ic_menu_gallery"
+        app:startIconTint="@color/pink_primary">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFlowerColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Preferred flower colors (optional)"
+            android:inputType="textCapWords"
+            android:maxLines="2" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Examples -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Examples: Red roses, White lilies, Pink carnations, Mixed pastel colors"
+        android:textSize="12sp"
+        android:textColor="@color/text_secondary"
+        android:background="@color/background_secondary"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical" />
+
+    <!-- Special Instructions -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/pink_primary"
+        app:hintTextColor="@color/pink_primary"
+        app:startIconDrawable="@android:drawable/ic_menu_edit"
+        app:startIconTint="@color/pink_primary">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSpecialInstructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Special instructions (optional)"
+            android:inputType="textMultiLine|textCapSentences"
+            android:maxLines="3"
+            android:minLines="2" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Instructions examples -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 Examples: Make it extra fragrant, Add a ribbon, Delivery instructions, etc."
+        android:textSize="12sp"
+        android:textColor="@color/text_secondary"
+        android:background="@color/background_secondary"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical" />
+
+    <!-- Note -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📝 Note: Our florists will do their best to accommodate your preferences based on flower availability."
+        android:textSize="12sp"
+        android:textColor="@color/pink_primary"
+        android:background="@color/pink_light"
+        android:padding="12dp"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical" />
+
+</LinearLayout>
