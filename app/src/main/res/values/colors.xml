@@ -52,4 +52,8 @@
     <color name="status_out_of_stock">#EF4444</color>
     <color name="status_out_of_stock_bg">#FEE2E2</color>
     
+    <!-- Additional Colors -->
+    <color name="primary">@color/pink_primary</color>
+    <color name="light_pink">@color/pink_light</color>
+    
 </resources>

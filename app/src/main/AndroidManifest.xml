@@ -102,6 +102,20 @@
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
+        <!-- Payment Activity -->
+        <activity
+            android:name=".user.payment.PaymentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="bouquetbliss" 
+                      android:host="payment" />
+            </intent-filter>
+        </activity>
+
         <!-- Registration Activity -->
         <activity
             android:name=".common.auth.RegisterActivity"
@@ -144,6 +158,17 @@
             android:name=".MainActivity"
             android:exported="false"
             android:label="@string/app_name" />
+
+        <!-- FileProvider for sharing PDF files -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
