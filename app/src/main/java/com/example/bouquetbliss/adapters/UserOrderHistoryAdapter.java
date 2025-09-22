@@ -102,7 +102,7 @@ public class UserOrderHistoryAdapter extends RecyclerView.Adapter<UserOrderHisto
             }
             
             // Set status and color with translation
-            String statusText = getStatusDisplayText(order.getStatus());
+            String statusText = getStatusDisplayText(order);
             String statusDesc = getStatusDescription(order.getStatus());
             
             if (translationManager != null) {
@@ -156,7 +156,15 @@ public class UserOrderHistoryAdapter extends RecyclerView.Adapter<UserOrderHisto
             tvOrderStatus.setBackgroundTintList(context.getColorStateList(backgroundRes));
         }
 
-        private String getStatusDisplayText(String status) {
+        private String getStatusDisplayText(Order order) {
+            String status = order.getStatus();
+            
+            // Check if payment is required for pending orders
+            if (Order.Status.PENDING.equals(status) && 
+                (order.getPaymentStatus() == null || !Order.PaymentStatus.PAID.equals(order.getPaymentStatus()))) {
+                return "Payment Required!";
+            }
+            
             switch (status) {
                 case Order.Status.PENDING:
                     return "Pending Review";

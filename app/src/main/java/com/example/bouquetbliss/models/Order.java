@@ -20,6 +20,16 @@ public class Order {
     private String rejectionReason;
     private long createdAt;
     private long updatedAt;
+    
+    // Payment related fields
+    private String paymentStatus; // pending, processing, paid, failed, refunded
+    private String paymentMethod; // toyyibpay, cash_on_delivery
+    private String transactionId; // ToyyibPay transaction ID
+    private String billCode; // ToyyibPay bill code
+    private String paymentUrl; // ToyyibPay payment URL
+    private double paidAmount;
+    private long paymentDate;
+    private String invoicePath; // Path to generated PDF invoice
 
     // Constructors
     public Order() {}
@@ -42,6 +52,12 @@ public class Order {
         this.orderDate = System.currentTimeMillis();
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        
+        // Initialize payment fields
+        this.paymentStatus = PaymentStatus.PENDING;
+        this.paymentMethod = "";
+        this.paidAmount = 0.0;
+        this.paymentDate = 0;
     }
 
     // Status constants
@@ -59,6 +75,19 @@ public class Order {
         public static final String PREPARING = "preparing";
         public static final String READY_FOR_PICKUP = "ready_for_pickup";
         public static final String COMPLETED = "completed";
+    }
+
+    public static class PaymentStatus {
+        public static final String PENDING = "pending";
+        public static final String PROCESSING = "processing";
+        public static final String PAID = "paid";
+        public static final String FAILED = "failed";
+        public static final String REFUNDED = "refunded";
+    }
+
+    public static class PaymentMethod {
+        public static final String TOYYIBPAY = "toyyibpay";
+        public static final String CASH_ON_DELIVERY = "cash_on_delivery";
     }
 
     // Getters and Setters
@@ -119,6 +148,34 @@ public class Order {
     public long getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 
+    // Payment related getters and setters
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { 
+        this.paymentStatus = paymentStatus;
+        this.updatedAt = System.currentTimeMillis();
+    }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+
+    public String getBillCode() { return billCode; }
+    public void setBillCode(String billCode) { this.billCode = billCode; }
+
+    public String getPaymentUrl() { return paymentUrl; }
+    public void setPaymentUrl(String paymentUrl) { this.paymentUrl = paymentUrl; }
+
+    public double getPaidAmount() { return paidAmount; }
+    public void setPaidAmount(double paidAmount) { this.paidAmount = paidAmount; }
+
+    public long getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(long paymentDate) { this.paymentDate = paymentDate; }
+
+    public String getInvoicePath() { return invoicePath; }
+    public void setInvoicePath(String invoicePath) { this.invoicePath = invoicePath; }
+
     // Helper methods
     public boolean isPending() { return Status.PENDING.equals(status); }
     public boolean isApproved() { return Status.APPROVED.equals(status) || Status.IN_PREPARATION.equals(status); }
@@ -151,4 +208,11 @@ public class Order {
         if (items == null) return 0;
         return items.stream().mapToInt(OrderItem::getQuantity).sum();
     }
+
+    // Payment helper methods
+    public boolean isPaymentPending() { return PaymentStatus.PENDING.equals(paymentStatus); }
+    public boolean isPaymentProcessing() { return PaymentStatus.PROCESSING.equals(paymentStatus); }
+    public boolean isPaymentPaid() { return PaymentStatus.PAID.equals(paymentStatus); }
+    public boolean isPaymentFailed() { return PaymentStatus.FAILED.equals(paymentStatus); }
+    public boolean hasPaymentUrl() { return paymentUrl != null && !paymentUrl.isEmpty(); }
 }

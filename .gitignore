@@ -13,3 +13,54 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase Configuration (contains sensitive project info)
+app/google-services.json
+google-services.json
+
+# API Keys and Credentials
+app/src/main/res/values/api_keys.xml
+**/api_keys.xml
+**/secrets.xml
+
+# Keystore files (for app signing)
+*.jks
+*.keystore
+keystore.properties
+key.properties
+
+# Environment-specific configuration
+.env
+.env.local
+.env.production
+
+# ToyyibPay credentials (if stored in separate files)
+toyyibpay.properties
+payment.properties
+
+# Files containing actual ToyyibPay credentials
+app/src/main/java/com/example/bouquetbliss/services/ToyyibPayService.java
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# IDE-specific files
+.vscode/
+*.swp
+*.swo
+
+# OS-specific files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+firestore-debug.log

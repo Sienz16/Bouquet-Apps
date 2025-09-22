@@ -1,0 +1,248 @@
+package com.example.bouquetbliss.services;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+
+public class ToyyibPayService {
+    private static final String TAG = "ToyyibPayService";
+    
+    // ToyyibPay API URLs
+    private static final String BASE_URL = "https://toyyibpay.com/";
+    private static final String CREATE_BILL_URL = BASE_URL + "index.php/api/createBill";
+    private static final String GET_BILL_URL = BASE_URL + "index.php/api/getBillStatus";
+    
+    // Your ToyyibPay credentials - Replace with your actual production credentials from toyyibpay.com
+    private static final String USER_SECRET_KEY = "YOUR_TOYYIBPAY_SECRET_KEY_HERE";
+    private static final String CATEGORY_CODE = "YOUR_TOYYIBPAY_CATEGORY_CODE_HERE";
+    
+    private final OkHttpClient httpClient;
+    private final Gson gson;
+
+    public ToyyibPayService() {
+        // Create HTTP client with logging
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        
+        httpClient = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
+                
+        gson = new Gson();
+    }
+
+    public interface PaymentCallback {
+        void onSuccess(String billCode, String paymentUrl);
+        void onError(String error);
+    }
+
+    public interface BillStatusCallback {
+        void onSuccess(String billStatus, String transactionId, double paidAmount);
+        void onError(String error);
+    }
+
+    /**
+     * Create a bill with ToyyibPay
+     */
+    public void createBill(String orderId, String customerName, String customerEmail, 
+                          String customerPhone, double amount, String description, 
+                          String returnUrl, PaymentCallback callback) {
+        
+        // Validate minimum amount (ToyyibPay requires minimum RM 1.00)
+        if (amount < 1.00) {
+            callback.onError("Minimum payment amount is RM 1.00. Current amount: RM " + String.format("%.2f", amount));
+            return;
+        }
+        
+        // Create a short bill name (max 30 characters)
+        String billName = "BB Order " + orderId;
+        if (billName.length() > 30) {
+            billName = billName.substring(0, 30);
+        }
+        
+        // Convert amount to cents (ToyyibPay requires amount in cents: 100 = RM1)
+        int amountInCents = (int) Math.round(amount * 100);
+        String formattedAmount = String.valueOf(amountInCents);
+        
+        // Use provided phone number (required by ToyyibPay)
+        String validPhone = (customerPhone != null && !customerPhone.trim().isEmpty()) 
+                ? customerPhone.trim() 
+                : "";
+        
+        
+        RequestBody formBody = new FormBody.Builder()
+                .add("userSecretKey", USER_SECRET_KEY)
+                .add("categoryCode", CATEGORY_CODE)
+                .add("billName", billName)
+                .add("billDescription", description)
+                .add("billPriceSetting", "1") // Fixed price
+                .add("billPayorInfo", "1") // Collect payer info
+                .add("billAmount", formattedAmount)
+                .add("billReturnUrl", returnUrl)
+                .add("billCallbackUrl", returnUrl) // Same as return URL for now
+                .add("billExternalReferenceNo", orderId)
+                .add("billTo", customerName)
+                .add("billEmail", customerEmail)
+                .add("billPhone", validPhone)
+                .add("billSplitPayment", "0")
+                .add("billSplitPaymentArgs", "")
+                .add("billPaymentChannel", "0") // All channels
+                .add("billContentEmail", "Thank you for your purchase from Bouquet Bliss!")
+                .add("billChargeToCustomer", "1") // Customer pays the fee
+                .build();
+
+        Request request = new Request.Builder()
+                .url(CREATE_BILL_URL)
+                .post(formBody)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onError("Network error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String responseBody = response.body().string();
+                    
+                    if (response.isSuccessful()) {
+                        try {
+                            // Try parsing as array first (ToyyibPay success response format)
+                            if (responseBody.trim().startsWith("[")) {
+                                com.google.gson.JsonArray jsonArray = JsonParser.parseString(responseBody).getAsJsonArray();
+                                if (jsonArray.size() > 0) {
+                                    JsonObject jsonResponse = jsonArray.get(0).getAsJsonObject();
+                                    if (jsonResponse.has("BillCode")) {
+                                        String billCode = jsonResponse.get("BillCode").getAsString();
+                                        String paymentUrl = BASE_URL + billCode;
+                                        callback.onSuccess(billCode, paymentUrl);
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // Try parsing as object (error response format)
+                            JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+                            if (jsonResponse.has("BillCode")) {
+                                String billCode = jsonResponse.get("BillCode").getAsString();
+                                String paymentUrl = BASE_URL + billCode;
+                                callback.onSuccess(billCode, paymentUrl);
+                            } else {
+                                String error = "Invalid response format";
+                                if (jsonResponse.has("msg")) {
+                                    error = jsonResponse.get("msg").getAsString();
+                                }
+                                callback.onError(error);
+                            }
+                        } catch (Exception parseException) {
+                            callback.onError("Error parsing response: " + parseException.getMessage());
+                        }
+                    } else {
+                        callback.onError("HTTP Error: " + response.code());
+                    }
+                } catch (Exception e) {
+                    callback.onError("Error parsing response: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Get bill status from ToyyibPay
+     */
+    public void getBillStatus(String billCode, BillStatusCallback callback) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("userSecretKey", USER_SECRET_KEY)
+                .add("billCode", billCode)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(GET_BILL_URL)
+                .post(formBody)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onError("Network error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String responseBody = response.body().string();
+                    
+                    if (response.isSuccessful()) {
+                        JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+                        
+                        if (jsonResponse.has("billpaymentStatus")) {
+                            String billStatus = jsonResponse.get("billpaymentStatus").getAsString();
+                            String transactionId = "";
+                            double paidAmount = 0.0;
+                            
+                            if (jsonResponse.has("billExternalReferenceNo")) {
+                                transactionId = jsonResponse.get("billExternalReferenceNo").getAsString();
+                            }
+                            
+                            if (jsonResponse.has("billpaymentAmount") && !jsonResponse.get("billpaymentAmount").isJsonNull()) {
+                                paidAmount = jsonResponse.get("billpaymentAmount").getAsDouble();
+                            }
+                            
+                            callback.onSuccess(billStatus, transactionId, paidAmount);
+                        } else {
+                            callback.onError("Invalid response format");
+                        }
+                    } else {
+                        callback.onError("HTTP Error: " + response.code());
+                    }
+                } catch (Exception e) {
+                    callback.onError("Error parsing response: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Convert ToyyibPay bill status to our payment status
+     */
+    public static String convertToPaymentStatus(String toyyibPayStatus) {
+        switch (toyyibPayStatus.toLowerCase()) {
+            case "1":
+            case "paid":
+                return "paid";
+            case "0":
+            case "pending":
+                return "pending";
+            case "2":
+            case "unsuccessful":
+            case "failed":
+                return "failed";
+            default:
+                return "pending";
+        }
+    }
+
+    /**
+     * Generate return URL for the app
+     */
+    public static String generateReturnUrl(String orderId) {
+        return "bouquetbliss://payment/return?order_id=" + orderId;
+    }
+}

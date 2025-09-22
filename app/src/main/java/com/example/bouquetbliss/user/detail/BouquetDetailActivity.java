@@ -14,6 +14,7 @@ import com.example.bouquetbliss.models.Bouquet;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.models.OrderItem;
 import com.example.bouquetbliss.user.base.BaseUserNavigationActivity;
+import com.example.bouquetbliss.user.payment.PaymentActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -108,6 +109,7 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
 
         // Set bouquet information
         binding.textBouquetName.setText(currentBouquet.getName());
+        
         binding.textPrice.setText(String.format("RM %.2f", currentBouquet.getPrice()));
         binding.textDescription.setText(currentBouquet.getDescription());
         binding.textCategory.setText(currentBouquet.getCategory());
@@ -235,7 +237,7 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
         message.append("\n\nDo you want to submit this order request?");
         
         builder.setMessage(message.toString())
-                .setPositiveButton("Submit Request", (dialog, which) -> submitOrderRequest())
+                .setPositiveButton("Proceed to Payment", (dialog, which) -> submitOrderRequest())
                 .setNegativeButton("Back", (dialog, which) -> showOrderCustomizationDialog());
         
         builder.show();
@@ -247,6 +249,44 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
         binding.progressBar.setVisibility(android.view.View.VISIBLE);
         binding.btnRequestOrder.setEnabled(false);
 
+        // First, fetch user profile to get phone number
+        fetchUserProfileAndCreateOrder();
+    }
+
+    private void fetchUserProfileAndCreateOrder() {
+        String userId = auth.getCurrentUser().getUid();
+        
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String userPhone = "";
+                    if (documentSnapshot.exists()) {
+                        userPhone = documentSnapshot.getString("phoneNumber");
+                        if (userPhone == null) userPhone = "";
+                    }
+                    
+                    // If still no phone, show error and don't proceed
+                    if (userPhone.trim().isEmpty()) {
+                        binding.progressBar.setVisibility(android.view.View.GONE);
+                        binding.btnRequestOrder.setEnabled(true);
+                        Toast.makeText(BouquetDetailActivity.this, 
+                            "Please add your phone number in your profile before making payment.", 
+                            Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    
+                    createOrderWithUserData(userPhone.trim());
+                })
+                .addOnFailureListener(e -> {
+                    binding.progressBar.setVisibility(android.view.View.GONE);
+                    binding.btnRequestOrder.setEnabled(true);
+                    Toast.makeText(BouquetDetailActivity.this, 
+                        "Failed to load profile. Please try again.", 
+                        Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void createOrderWithUserData(String userPhone) {
         // Create order item
         String imageUrl = "";
         if (currentBouquet.getImageUrls() != null && !currentBouquet.getImageUrls().isEmpty()) {
@@ -264,6 +304,25 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
 
+        // Calculate total amount
+        double bouquetPrice = currentBouquet.getPrice();
+        
+        // Ensure valid price
+        if (bouquetPrice <= 0) {
+            bouquetPrice = 15.00; // Default price if invalid
+        }
+        
+        double totalAmount = bouquetPrice * selectedQuantity;
+        
+        // Validate minimum amount
+        if (totalAmount < 1.00) {
+            binding.progressBar.setVisibility(android.view.View.GONE);
+            binding.btnRequestOrder.setEnabled(true);
+            Toast.makeText(this, "Minimum order amount is RM 1.00. Current amount: RM " + String.format("%.2f", totalAmount), 
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+        
         // Create order
         String customerName = auth.getCurrentUser().getDisplayName();
         if (customerName == null || customerName.isEmpty()) {
@@ -273,27 +332,30 @@ public class BouquetDetailActivity extends BaseUserNavigationActivity {
         Order order = new Order(
                 auth.getCurrentUser().getUid(),
                 customerName,
-                "", // Phone number - to be collected later
+                userPhone, // Use actual user phone number from profile
                 auth.getCurrentUser().getEmail(),
                 orderItems,
-                currentBouquet.getPrice() * selectedQuantity,
+                totalAmount,
                 System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000), // Delivery date: 7 days from now
                 "To be confirmed", // Delivery address - to be collected later
                 specialInstructions, // Special instructions
                 flowerColorPreference // Flower color preference
         );
 
-        // Submit to Firebase
+        // Submit to Firebase and redirect to payment
         db.collection("orders")
                 .add(order)
                 .addOnSuccessListener(documentReference -> {
                     binding.progressBar.setVisibility(android.view.View.GONE);
                     binding.btnRequestOrder.setEnabled(true);
                     
-                    Toast.makeText(this, "Order request submitted successfully!", Toast.LENGTH_LONG).show();
+                    // Redirect to payment activity
+                    Intent paymentIntent = new Intent(this, PaymentActivity.class);
+                    paymentIntent.putExtra("order_id", documentReference.getId());
+                    startActivity(paymentIntent);
                     
-                    // Show success dialog with order ID
-                    showSuccessDialog(documentReference.getId());
+                    // Close this activity
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     binding.progressBar.setVisibility(android.view.View.GONE);

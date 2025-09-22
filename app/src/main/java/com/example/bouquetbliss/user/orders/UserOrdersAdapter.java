@@ -94,7 +94,7 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
             textOrderDate.setText(dateFormat.format(orderDate));
             
             // Set order status with appropriate styling
-            setOrderStatus(order.getStatus(), context);
+            setOrderStatus(order, context);
             
             // Set order items summary
             if (order.getItems() != null && !order.getItems().isEmpty()) {
@@ -120,16 +120,24 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
             });
         }
 
-        private void setOrderStatus(String status, Context context) {
+        private void setOrderStatus(Order order, Context context) {
             String statusText;
             int colorRes, iconRes;
+            String status = order.getStatus();
             
-            switch (status.toLowerCase()) {
-                case "pending":
-                    statusText = "Pending Review";
-                    colorRes = R.color.warning;
-                    iconRes = android.R.drawable.ic_menu_recent_history;
-                    break;
+            // Check if payment is required for pending orders
+            if ("pending".equalsIgnoreCase(status) && 
+                (order.getPaymentStatus() == null || !Order.PaymentStatus.PAID.equals(order.getPaymentStatus()))) {
+                statusText = "Payment Required!";
+                colorRes = R.color.error;
+                iconRes = android.R.drawable.ic_dialog_alert;
+            } else {
+                switch (status.toLowerCase()) {
+                    case "pending":
+                        statusText = "Pending Review";
+                        colorRes = R.color.warning;
+                        iconRes = android.R.drawable.ic_menu_recent_history;
+                        break;
                 case "approved":
                     statusText = "Approved";
                     colorRes = R.color.info;
@@ -160,6 +168,7 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Or
                     colorRes = R.color.text_secondary;
                     iconRes = android.R.drawable.ic_menu_help;
                     break;
+                }
             }
             
             // Apply translation if available

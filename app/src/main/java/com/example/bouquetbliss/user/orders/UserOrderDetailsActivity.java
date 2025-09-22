@@ -13,7 +13,10 @@ import com.example.bouquetbliss.adapters.OrderItemDetailsAdapter;
 import com.example.bouquetbliss.databinding.ActivityUserOrderDetailsBinding;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.user.base.BaseUserNavigationActivity;
+import com.example.bouquetbliss.user.payment.PaymentActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.File;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -84,6 +87,22 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
                 Toast.makeText(this, "Reorder functionality coming soon!", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // Payment button click listener
+        binding.btnPayNow.setOnClickListener(v -> {
+            if (currentOrder != null) {
+                Intent paymentIntent = new Intent(this, PaymentActivity.class);
+                paymentIntent.putExtra("order_id", currentOrder.getId());
+                startActivity(paymentIntent);
+            }
+        });
+
+        // Download invoice button click listener
+        binding.btnDownloadInvoice.setOnClickListener(v -> {
+            if (currentOrder != null && currentOrder.getInvoicePath() != null) {
+                openInvoiceFile(currentOrder.getInvoicePath());
+            }
+        });
     }
 
     private void loadOrderDetails() {
@@ -144,6 +163,9 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
         
         // Order total
         binding.tvOrderTotal.setText(String.format("RM %.2f", currentOrder.getTotalAmount()));
+        
+        // Payment status and actions
+        setupPaymentStatus();
         
         // Setup order items
         setupOrderItems();
@@ -274,6 +296,133 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
                 return "Rejected";
             default:
                 return "Unknown";
+        }
+    }
+
+    private void setupPaymentStatus() {
+        if (currentOrder.getPaymentStatus() != null) {
+            String paymentStatus = currentOrder.getPaymentStatus();
+            binding.tvPaymentStatus.setText(getPaymentStatusDisplayText(paymentStatus));
+            
+            // Set payment status color
+            switch (paymentStatus) {
+                case Order.PaymentStatus.PAID:
+                    binding.tvPaymentStatus.setTextColor(getResources().getColor(R.color.success));
+                    break;
+                case Order.PaymentStatus.FAILED:
+                    binding.tvPaymentStatus.setTextColor(getResources().getColor(R.color.error));
+                    break;
+                case Order.PaymentStatus.PROCESSING:
+                    binding.tvPaymentStatus.setTextColor(getResources().getColor(R.color.warning));
+                    break;
+                default:
+                    binding.tvPaymentStatus.setTextColor(getResources().getColor(R.color.text_secondary));
+                    break;
+            }
+            
+            // Show payment method if available
+            if (currentOrder.getPaymentMethod() != null && !currentOrder.getPaymentMethod().isEmpty()) {
+                String paymentMethod = getPaymentMethodDisplayText(currentOrder.getPaymentMethod());
+                binding.tvPaymentMethod.setText(paymentMethod);
+                binding.layoutPaymentMethod.setVisibility(View.VISIBLE);
+            } else {
+                binding.layoutPaymentMethod.setVisibility(View.GONE);
+            }
+            
+            // Show transaction ID if available
+            if (currentOrder.getTransactionId() != null && !currentOrder.getTransactionId().isEmpty()) {
+                binding.tvTransactionId.setText(currentOrder.getTransactionId());
+                binding.layoutTransactionId.setVisibility(View.VISIBLE);
+            } else {
+                binding.layoutTransactionId.setVisibility(View.GONE);
+            }
+            
+            // Show payment date if available
+            if (currentOrder.getPaymentDate() > 0) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault());
+                binding.tvPaymentDate.setText(dateFormat.format(new Date(currentOrder.getPaymentDate())));
+                binding.layoutPaymentDate.setVisibility(View.VISIBLE);
+            } else {
+                binding.layoutPaymentDate.setVisibility(View.GONE);
+            }
+            
+            // Show/hide payment and invoice buttons
+            setupPaymentButtons(paymentStatus);
+            
+            binding.layoutPaymentStatus.setVisibility(View.VISIBLE);
+        } else {
+            binding.layoutPaymentStatus.setVisibility(View.GONE);
+        }
+    }
+    
+    private void setupPaymentButtons(String paymentStatus) {
+        // Pay Now button
+        if (Order.PaymentStatus.PENDING.equals(paymentStatus) || Order.PaymentStatus.FAILED.equals(paymentStatus)) {
+            binding.btnPayNow.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnPayNow.setVisibility(View.GONE);
+        }
+        
+        // Download Invoice button
+        if (Order.PaymentStatus.PAID.equals(paymentStatus) && 
+            currentOrder.getInvoicePath() != null && !currentOrder.getInvoicePath().isEmpty()) {
+            binding.btnDownloadInvoice.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnDownloadInvoice.setVisibility(View.GONE);
+        }
+    }
+    
+    private String getPaymentStatusDisplayText(String status) {
+        switch (status) {
+            case Order.PaymentStatus.PENDING:
+                return "Payment Pending";
+            case Order.PaymentStatus.PROCESSING:
+                return "Processing Payment";
+            case Order.PaymentStatus.PAID:
+                return "Payment Successful";
+            case Order.PaymentStatus.FAILED:
+                return "Payment Failed";
+            case Order.PaymentStatus.REFUNDED:
+                return "Payment Refunded";
+            default:
+                return "Unknown Status";
+        }
+    }
+    
+    private String getPaymentMethodDisplayText(String method) {
+        switch (method) {
+            case Order.PaymentMethod.TOYYIBPAY:
+                return "ToyyibPay";
+            case Order.PaymentMethod.CASH_ON_DELIVERY:
+                return "Cash on Delivery";
+            default:
+                return "Unknown Method";
+        }
+    }
+    
+    private void openInvoiceFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (file.exists()) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".fileprovider",
+                    file
+                );
+                intent.setDataAndType(uri, "application/pdf");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "No PDF viewer found. Please install a PDF reader app.", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "Invoice file not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error opening invoice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
