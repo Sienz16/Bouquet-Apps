@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/card_background"
+    android:layout_marginBottom="8dp">
+
+    <!-- Rating Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/rounded_image_background"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/ivBouquetImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_bouquet" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvBouquetName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rose Bouquet"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tvStarRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="★★★★★"
+                    android:textSize="18sp"
+                    android:textColor="@color/star_color" />
+
+                <TextView
+                    android:id="@+id/tvRatingNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(5)"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="center_vertical" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvRatingDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 days ago"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:layout_gravity="top" />
+
+    </LinearLayout>
+
+    <!-- Rating Comment -->
+    <TextView
+        android:id="@+id/tvRatingComment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Beautiful bouquet! The flowers were fresh and the arrangement was perfect. Highly recommend!"
+        android:textSize="14sp"
+        android:textColor="@color/text_primary"
+        android:lineSpacingExtra="2dp"
+        android:visibility="gone" />
+
+    <!-- Verified Purchase Badge -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/status_background"
+        android:backgroundTint="@color/success"
+        android:padding="4dp">
+
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@android:drawable/ic_dialog_info"
+            app:tint="@color/white"
+            android:layout_gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verified Purchase"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

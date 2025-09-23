@@ -165,6 +165,5 @@ If you encounter any issues:
 
 After successful setup, you can:
 1. Implement user registration functionality
-2. Add forgot password feature
-3. Implement the remaining modules (stock management, orders, etc.)
-4. Add more security rules as features are developed
+2. Implement the remaining modules (stock management, orders, etc.)
+3. Add more security rules as features are developed

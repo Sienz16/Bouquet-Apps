@@ -12,19 +12,23 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.bouquetbliss.R;
+import com.example.bouquetbliss.adapters.AdminRatingAdapter;
 import com.example.bouquetbliss.adapters.OrderItemDetailsAdapter;
 import com.example.bouquetbliss.admin.base.BaseAdminNavigationActivity;
 import com.example.bouquetbliss.databinding.ActivityOrderDetailsBinding;
 import com.example.bouquetbliss.models.Order;
 import com.example.bouquetbliss.models.OrderItem;
+import com.example.bouquetbliss.models.Rating;
 import com.example.bouquetbliss.models.StockTransaction;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,8 +41,10 @@ public class OrderDetailsActivity extends BaseAdminNavigationActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private OrderItemDetailsAdapter adapter;
+    private AdminRatingAdapter ratingAdapter;
     private Order currentOrder;
     private String orderId;
+    private List<Rating> ratingsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +54,7 @@ public class OrderDetailsActivity extends BaseAdminNavigationActivity {
 
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+        ratingsList = new ArrayList<>();
 
         // Get order ID from intent
         orderId = getIntent().getStringExtra("order_id");
@@ -177,6 +184,11 @@ public class OrderDetailsActivity extends BaseAdminNavigationActivity {
         
         // Setup status-specific UI
         setupStatusUI();
+        
+        // Load ratings if order is completed
+        if (currentOrder.isCompleted()) {
+            loadCustomerRatings();
+        }
     }
 
     private void setupOrderItems() {
@@ -438,6 +450,47 @@ public class OrderDetailsActivity extends BaseAdminNavigationActivity {
             default:
                 return "Unknown";
         }
+    }
+
+    private void loadCustomerRatings() {
+        // Show ratings section
+        binding.layoutCustomerRatings.setVisibility(View.VISIBLE);
+        
+        // Setup ratings recycler view
+        ratingAdapter = new AdminRatingAdapter(ratingsList, this);
+        binding.recyclerViewRatings.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerViewRatings.setAdapter(ratingAdapter);
+        
+        // Load ratings from Firestore
+        db.collection("ratings")
+                .whereEqualTo("orderId", orderId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    ratingsList.clear();
+                    
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Rating rating = document.toObject(Rating.class);
+                        rating.setId(document.getId());
+                        ratingsList.add(rating);
+                    }
+                    
+                    if (ratingsList.isEmpty()) {
+                        // No ratings found
+                        binding.recyclerViewRatings.setVisibility(View.GONE);
+                        binding.tvNoRatings.setVisibility(View.VISIBLE);
+                    } else {
+                        // Show ratings
+                        binding.recyclerViewRatings.setVisibility(View.VISIBLE);
+                        binding.tvNoRatings.setVisibility(View.GONE);
+                        ratingAdapter.updateRatings(ratingsList);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Error loading ratings
+                    binding.recyclerViewRatings.setVisibility(View.GONE);
+                    binding.tvNoRatings.setText("Failed to load ratings");
+                    binding.tvNoRatings.setVisibility(View.VISIBLE);
+                });
     }
 
     @Override

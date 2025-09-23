@@ -557,6 +557,58 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Customer Ratings (for completed orders) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layoutCustomerRatings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/white"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Customer Ratings"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="16dp"
+                        android:drawableStart="@drawable/ic_star_filled"
+                        android:drawableTint="@color/star_color"
+                        android:drawablePadding="8dp" />
+
+                    <!-- Ratings List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewRatings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                    <!-- No Ratings Message -->
+                    <TextView
+                        android:id="@+id/tvNoRatings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Customer has not rated this order yet"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"

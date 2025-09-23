@@ -702,6 +702,37 @@
                     android:layout_marginEnd="8dp" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConfirmDelivery"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="Confirm Delivery"
+                    android:textSize="14sp"
+                    android:backgroundTint="@color/success"
+                    android:textColor="@color/white"
+                    app:cornerRadius="12dp"
+                    app:icon="@android:drawable/ic_menu_mylocation"
+                    app:iconSize="18dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRateOrder"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="Rate Order"
+                    android:textSize="14sp"
+                    android:backgroundTint="@color/star_color"
+                    android:textColor="@color/black"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_star_filled"
+                    app:iconTint="@color/black"
+                    app:iconSize="18dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReorder"
                     android:layout_width="0dp"
                     android:layout_height="56dp"
