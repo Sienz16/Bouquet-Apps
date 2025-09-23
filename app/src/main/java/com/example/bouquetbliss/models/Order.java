@@ -30,6 +30,14 @@ public class Order {
     private double paidAmount;
     private long paymentDate;
     private String invoicePath; // Path to generated PDF invoice
+    
+    // Rating related fields
+    private boolean isRated; // Whether user has rated this order
+    private long ratedAt; // When the order was rated
+    
+    // Delivery confirmation fields
+    private long deliveryConfirmedAt; // When customer confirmed delivery
+    private String deliveryConfirmedBy; // Who confirmed delivery (customer/admin)
 
     // Constructors
     public Order() {}
@@ -58,6 +66,14 @@ public class Order {
         this.paymentMethod = "";
         this.paidAmount = 0.0;
         this.paymentDate = 0;
+        
+        // Initialize rating fields
+        this.isRated = false;
+        this.ratedAt = 0;
+        
+        // Initialize delivery confirmation fields
+        this.deliveryConfirmedAt = 0;
+        this.deliveryConfirmedBy = "";
     }
 
     // Status constants
@@ -175,6 +191,23 @@ public class Order {
 
     public String getInvoicePath() { return invoicePath; }
     public void setInvoicePath(String invoicePath) { this.invoicePath = invoicePath; }
+    
+    // Rating related getters and setters
+    public boolean isRated() { return isRated; }
+    public void setRated(boolean rated) { 
+        this.isRated = rated;
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
+    public long getRatedAt() { return ratedAt; }
+    public void setRatedAt(long ratedAt) { this.ratedAt = ratedAt; }
+    
+    // Delivery confirmation getters and setters
+    public long getDeliveryConfirmedAt() { return deliveryConfirmedAt; }
+    public void setDeliveryConfirmedAt(long deliveryConfirmedAt) { this.deliveryConfirmedAt = deliveryConfirmedAt; }
+    
+    public String getDeliveryConfirmedBy() { return deliveryConfirmedBy; }
+    public void setDeliveryConfirmedBy(String deliveryConfirmedBy) { this.deliveryConfirmedBy = deliveryConfirmedBy; }
 
     // Helper methods
     public boolean isPending() { return Status.PENDING.equals(status); }
@@ -215,4 +248,24 @@ public class Order {
     public boolean isPaymentPaid() { return PaymentStatus.PAID.equals(paymentStatus); }
     public boolean isPaymentFailed() { return PaymentStatus.FAILED.equals(paymentStatus); }
     public boolean hasPaymentUrl() { return paymentUrl != null && !paymentUrl.isEmpty(); }
+    
+    // Rating helper methods
+    public boolean canBeRated() { 
+        return isCompleted() && isPaymentPaid() && !isRated(); 
+    }
+    
+    public void markAsRated() {
+        this.isRated = true;
+        this.ratedAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
+    // Delivery confirmation helper methods
+    public boolean isDeliveryConfirmed() {
+        return deliveryConfirmedAt > 0;
+    }
+    
+    public boolean isDeliveryConfirmedByCustomer() {
+        return "customer".equals(deliveryConfirmedBy);
+    }
 }

@@ -66,11 +66,6 @@ public class LoginActivity extends AppCompatActivity {
         
         binding.btnBack.setOnClickListener(v -> finish());
         
-        binding.tvForgotPassword.setOnClickListener(v -> {
-            // TODO: Implement forgot password functionality
-            Toast.makeText(this, "Forgot password feature coming soon!", Toast.LENGTH_SHORT).show();
-        });
-        
         binding.tvRegister.setOnClickListener(v -> {
             Intent intent = new Intent(this, RegisterActivity.class);
             startActivity(intent);

@@ -18,6 +18,10 @@ public class Bouquet {
     private long updatedAt;
     private String createdBy; // Admin/Technician ID
     
+    // Rating related fields
+    private double averageRating; // Average rating from all reviews
+    private int totalRatings; // Total number of ratings received
+    
     // Default constructor required for Firebase
     public Bouquet() {}
     
@@ -34,6 +38,10 @@ public class Bouquet {
         this.availability = quantity > 0 ? "Available" : "Out of Stock";
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
+        
+        // Initialize rating fields
+        this.averageRating = 0.0;
+        this.totalRatings = 0;
     }
     
     // Getters
@@ -51,6 +59,8 @@ public class Bouquet {
     public long getCreatedAt() { return createdAt; }
     public long getUpdatedAt() { return updatedAt; }
     public String getCreatedBy() { return createdBy; }
+    public double getAverageRating() { return averageRating; }
+    public int getTotalRatings() { return totalRatings; }
     
     // Setters
     public void setId(String id) { this.id = id; }
@@ -70,6 +80,8 @@ public class Bouquet {
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+    public void setTotalRatings(int totalRatings) { this.totalRatings = totalRatings; }
     
     // Helper methods
     private void updateAvailability() {
@@ -89,6 +101,37 @@ public class Bouquet {
     
     public boolean isAvailable() {
         return quantity > 0;
+    }
+    
+    // Rating helper methods
+    public void updateRating(double newAverageRating, int newTotalRatings) {
+        this.averageRating = newAverageRating;
+        this.totalRatings = newTotalRatings;
+        this.updatedAt = System.currentTimeMillis();
+    }
+    
+    public String getFormattedRating() {
+        if (totalRatings == 0) {
+            return "No ratings yet";
+        }
+        return String.format("%.1f ★ (%d reviews)", averageRating, totalRatings);
+    }
+    
+    public String getStarsDisplay() {
+        StringBuilder stars = new StringBuilder();
+        int fullStars = (int) averageRating;
+        boolean hasHalfStar = (averageRating - fullStars) >= 0.5;
+        
+        for (int i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+                stars.append("★");
+            } else if (i == fullStars + 1 && hasHalfStar) {
+                stars.append("⯪");
+            } else {
+                stars.append("☆");
+            }
+        }
+        return stars.toString();
     }
     
     // Predefined categories

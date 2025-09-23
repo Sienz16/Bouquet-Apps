@@ -11,7 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.bouquetbliss.R;
 import com.example.bouquetbliss.adapters.OrderItemDetailsAdapter;
 import com.example.bouquetbliss.databinding.ActivityUserOrderDetailsBinding;
+import com.example.bouquetbliss.dialogs.RatingDialog;
 import com.example.bouquetbliss.models.Order;
+import com.example.bouquetbliss.models.OrderItem;
+import com.example.bouquetbliss.models.Rating;
 import com.example.bouquetbliss.user.base.BaseUserNavigationActivity;
 import com.example.bouquetbliss.user.payment.PaymentActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -101,6 +104,20 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
         binding.btnDownloadInvoice.setOnClickListener(v -> {
             if (currentOrder != null && currentOrder.getInvoicePath() != null) {
                 openInvoiceFile(currentOrder.getInvoicePath());
+            }
+        });
+
+        // Confirm delivery button click listener
+        binding.btnConfirmDelivery.setOnClickListener(v -> {
+            if (currentOrder != null && Order.Status.READY.equals(currentOrder.getStatus())) {
+                showConfirmDeliveryDialog();
+            }
+        });
+
+        // Rate order button click listener
+        binding.btnRateOrder.setOnClickListener(v -> {
+            if (currentOrder != null && currentOrder.canBeRated()) {
+                showRatingOptions();
             }
         });
     }
@@ -204,11 +221,21 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
             case Order.Status.READY:
                 statusColor = getColor(R.color.status_available);
                 statusDescription = "Your order is ready for pickup!";
+                
+                // Show confirm delivery button for ready orders
+                binding.btnConfirmDelivery.setVisibility(View.VISIBLE);
                 break;
             case Order.Status.COMPLETED:
                 statusColor = getColor(R.color.status_available);
                 statusDescription = "Order completed successfully";
                 binding.btnReorder.setVisibility(View.VISIBLE);
+                
+                // Show rate button if order can be rated
+                if (currentOrder.canBeRated()) {
+                    binding.btnRateOrder.setVisibility(View.VISIBLE);
+                } else {
+                    binding.btnRateOrder.setVisibility(View.GONE);
+                }
                 break;
             case Order.Status.REJECTED:
                 statusColor = getColor(R.color.status_out_of_stock);
@@ -404,19 +431,21 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
         try {
             File file = new File(filePath);
             if (file.exists()) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
+                // First try to open with PDF viewer
+                Intent pdfIntent = new Intent(Intent.ACTION_VIEW);
                 Uri uri = androidx.core.content.FileProvider.getUriForFile(
                     this,
                     getPackageName() + ".fileprovider",
                     file
                 );
-                intent.setDataAndType(uri, "application/pdf");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                pdfIntent.setDataAndType(uri, "application/pdf");
+                pdfIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
+                if (pdfIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(pdfIntent);
                 } else {
-                    Toast.makeText(this, "No PDF viewer found. Please install a PDF reader app.", Toast.LENGTH_LONG).show();
+                    // No PDF viewer found, show options dialog
+                    showPdfOptionsDialog(uri);
                 }
             } else {
                 Toast.makeText(this, "Invoice file not found", Toast.LENGTH_SHORT).show();
@@ -424,6 +453,281 @@ public class UserOrderDetailsActivity extends BaseUserNavigationActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Error opening invoice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+    
+    private void showPdfOptionsDialog(Uri fileUri) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Open Invoice")
+               .setMessage("No PDF viewer app found. Choose an option:")
+               .setPositiveButton("Get PDF Reader", (dialog, which) -> {
+                   // Open Google Play Store to download a PDF reader
+                   openPlayStoreForPdfReader();
+               })
+               .setNegativeButton("Share Invoice", (dialog, which) -> {
+                   // Share the PDF file
+                   shareInvoiceFile(fileUri);
+               })
+               .setNeutralButton("Save to Downloads", (dialog, which) -> {
+                   // Save file to Downloads folder
+                   saveInvoiceToDownloads(fileUri);
+               })
+               .show();
+    }
+    
+    private void openPlayStoreForPdfReader() {
+        try {
+            // Try to open Play Store app first
+            Intent playStoreIntent = new Intent(Intent.ACTION_VIEW, 
+                Uri.parse("market://search?q=pdf+reader&c=apps"));
+            if (playStoreIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(playStoreIntent);
+            } else {
+                // Fallback to web browser
+                Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/search?q=pdf+reader&c=apps"));
+                if (webIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(webIntent);
+                } else {
+                    Toast.makeText(this, "Cannot open app store", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error opening app store: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void shareInvoiceFile(Uri fileUri) {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("application/pdf");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Invoice - Order " + 
+                (currentOrder != null ? currentOrder.getFormattedOrderId() : ""));
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Please find attached your order invoice.");
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            
+            Intent chooserIntent = Intent.createChooser(shareIntent, "Share Invoice");
+            if (chooserIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(chooserIntent);
+            } else {
+                Toast.makeText(this, "No apps available to share the file", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error sharing invoice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void saveInvoiceToDownloads(Uri fileUri) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                // For Android 10 and above, use MediaStore
+                saveInvoiceUsingMediaStore(fileUri);
+            } else {
+                // For older versions, save directly to Downloads folder
+                saveInvoiceToLegacyDownloads(fileUri);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error saving invoice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void saveInvoiceUsingMediaStore(Uri fileUri) {
+        try {
+            android.content.ContentResolver resolver = getContentResolver();
+            android.content.ContentValues contentValues = new android.content.ContentValues();
+            
+            String fileName = "Invoice_Order_" + 
+                (currentOrder != null ? currentOrder.getFormattedOrderId() : "Unknown") + ".pdf";
+            
+            contentValues.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+            contentValues.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
+            contentValues.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, 
+                android.os.Environment.DIRECTORY_DOWNLOADS);
+            
+            Uri downloadUri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
+            
+            if (downloadUri != null) {
+                java.io.InputStream inputStream = resolver.openInputStream(fileUri);
+                java.io.OutputStream outputStream = resolver.openOutputStream(downloadUri);
+                
+                if (inputStream != null && outputStream != null) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    
+                    inputStream.close();
+                    outputStream.close();
+                    
+                    Toast.makeText(this, "Invoice saved to Downloads folder", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Error accessing file streams", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Error creating download file", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error saving to Downloads: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void saveInvoiceToLegacyDownloads(Uri fileUri) {
+        try {
+            File downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(
+                android.os.Environment.DIRECTORY_DOWNLOADS);
+            
+            if (!downloadsDir.exists()) {
+                downloadsDir.mkdirs();
+            }
+            
+            String fileName = "Invoice_Order_" + 
+                (currentOrder != null ? currentOrder.getFormattedOrderId() : "Unknown") + ".pdf";
+            File destinationFile = new File(downloadsDir, fileName);
+            
+            java.io.InputStream inputStream = getContentResolver().openInputStream(fileUri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(destinationFile);
+            
+            if (inputStream != null) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+                
+                inputStream.close();
+                outputStream.close();
+                
+                Toast.makeText(this, "Invoice saved to Downloads folder: " + fileName, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Error reading source file", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error saving to Downloads: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void showRatingOptions() {
+        if (currentOrder.getItems() == null || currentOrder.getItems().isEmpty()) {
+            Toast.makeText(this, "No items to rate", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // If order has only one item, show rating dialog directly
+        if (currentOrder.getItems().size() == 1) {
+            showRatingDialog(currentOrder.getItems().get(0));
+            return;
+        }
+        
+        // If multiple items, show selection dialog
+        String[] itemNames = new String[currentOrder.getItems().size()];
+        for (int i = 0; i < currentOrder.getItems().size(); i++) {
+            OrderItem item = currentOrder.getItems().get(i);
+            itemNames[i] = item.getBouquetName() + " (Qty: " + item.getQuantity() + ")";
+        }
+        
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Select Bouquet to Rate")
+               .setItems(itemNames, (dialog, which) -> {
+                   showRatingDialog(currentOrder.getItems().get(which));
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
+    }
+    
+    private void showRatingDialog(OrderItem orderItem) {
+        RatingDialog ratingDialog = new RatingDialog(this, currentOrder, orderItem, 
+            new RatingDialog.RatingCallback() {
+                @Override
+                public void onRatingSubmitted(Rating rating) {
+                    // Refresh the order details to hide rate button
+                    displayOrderDetails();
+                    Toast.makeText(UserOrderDetailsActivity.this, 
+                        "Thank you for rating " + rating.getBouquetName() + "!", 
+                        Toast.LENGTH_SHORT).show();
+                }
+                
+                @Override
+                public void onRatingCancelled() {
+                    // Do nothing
+                }
+            });
+        
+        ratingDialog.show();
+    }
+    
+    private void showConfirmDeliveryDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Confirm Delivery")
+               .setMessage("Have you received your order?\n\n" +
+                          "Order: " + currentOrder.getFormattedOrderId() + "\n" +
+                          "Please confirm only after you have received your bouquet.")
+               .setPositiveButton("Yes, I received it", (dialog, which) -> {
+                   confirmDelivery();
+               })
+               .setNegativeButton("Not yet", null)
+               .setIcon(android.R.drawable.ic_dialog_info)
+               .show();
+    }
+    
+    private void confirmDelivery() {
+        // Show loading state
+        binding.btnConfirmDelivery.setEnabled(false);
+        binding.btnConfirmDelivery.setText("Confirming...");
+        
+        // Update order status to completed
+        currentOrder.setStatus(Order.Status.COMPLETED);
+        currentOrder.setUpdatedAt(System.currentTimeMillis());
+        
+        // Add delivery confirmation timestamp
+        java.util.Map<String, Object> updates = new java.util.HashMap<>();
+        updates.put("status", Order.Status.COMPLETED);
+        updates.put("updatedAt", System.currentTimeMillis());
+        updates.put("deliveryConfirmedAt", System.currentTimeMillis());
+        updates.put("deliveryConfirmedBy", "customer");
+        
+        db.collection("orders").document(orderId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    // Success - refresh the order details
+                    Toast.makeText(this, "Thank you! Your delivery has been confirmed.", Toast.LENGTH_LONG).show();
+                    
+                    // Reload order details to update UI
+                    loadOrderDetails();
+                    
+                    // Create notification for admin (optional)
+                    createAdminNotification();
+                })
+                .addOnFailureListener(e -> {
+                    // Reset button state on failure
+                    binding.btnConfirmDelivery.setEnabled(true);
+                    binding.btnConfirmDelivery.setText("Confirm Delivery");
+                    
+                    Toast.makeText(this, "Failed to confirm delivery: " + e.getMessage(), 
+                        Toast.LENGTH_LONG).show();
+                });
+    }
+    
+    private void createAdminNotification() {
+        // Create a simple notification record for admin
+        java.util.Map<String, Object> notification = new java.util.HashMap<>();
+        notification.put("type", "delivery_confirmed");
+        notification.put("orderId", currentOrder.getId());
+        notification.put("orderNumber", currentOrder.getFormattedOrderId());
+        notification.put("customerName", currentOrder.getCustomerName());
+        notification.put("message", "Customer confirmed delivery for order " + currentOrder.getFormattedOrderId());
+        notification.put("createdAt", System.currentTimeMillis());
+        notification.put("isRead", false);
+        
+        db.collection("admin_notifications")
+                .add(notification)
+                .addOnSuccessListener(documentReference -> {
+                    // Notification created successfully
+                })
+                .addOnFailureListener(e -> {
+                    // Log error but don't show to user
+                    android.util.Log.e("UserOrderDetails", "Failed to create admin notification", e);
+                });
     }
 
     @Override

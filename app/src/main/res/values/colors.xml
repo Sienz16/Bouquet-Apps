@@ -56,4 +56,8 @@
     <color name="primary">@color/pink_primary</color>
     <color name="light_pink">@color/pink_light</color>
     
+    <!-- Rating Colors -->
+    <color name="star_color">#FFD700</color>
+    <color name="star_inactive">#E0E0E0</color>
+    
 </resources>
