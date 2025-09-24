@@ -144,7 +144,7 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
     }
 
     private void showProfileMenu() {
-        String[] options = {"View Profile", "Settings", "Logout"};
+        String[] options = {"View Profile", "Logout"};
         
         new AlertDialog.Builder(this)
                 .setTitle("Profile Options")
@@ -153,10 +153,7 @@ public abstract class BaseAdminNavigationActivity extends AppCompatActivity {
                         case 0: // View Profile
                             navigateToProfile();
                             break;
-                        case 1: // Settings
-                            Toast.makeText(this, "Settings coming soon!", Toast.LENGTH_SHORT).show();
-                            break;
-                        case 2: // Logout
+                        case 1: // Logout
                             showLogoutConfirmation();
                             break;
                     }

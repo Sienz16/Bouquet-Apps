@@ -51,8 +51,9 @@ public class AdminDashboardActivity extends BaseAdminNavigationActivity {
             startActivity(intent);
         });
 
-        binding.cardManageUsers.setOnClickListener(v -> {
-            Toast.makeText(this, "User Management module coming soon!", Toast.LENGTH_SHORT).show();
+        binding.cardViewRatings.setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.example.bouquetbliss.admin.ratings.AdminRatingsActivity.class);
+            startActivity(intent);
         });
 
         binding.cardReports.setOnClickListener(v -> {

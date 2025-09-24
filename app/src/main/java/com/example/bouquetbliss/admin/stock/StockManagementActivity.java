@@ -137,9 +137,6 @@ public class StockManagementActivity extends BaseAdminNavigationActivity {
         binding.cardAddBouquet.setOnClickListener(v -> openAddBouquet());
         binding.fabAddBouquet.setOnClickListener(v -> openAddBouquet());
 
-        binding.cardCategories.setOnClickListener(v -> {
-            Toast.makeText(this, "Category management coming soon!", Toast.LENGTH_SHORT).show();
-        });
         
         // Add stock receiving navigation
         binding.btnStockReceiving.setOnClickListener(v -> openStockReceiving());

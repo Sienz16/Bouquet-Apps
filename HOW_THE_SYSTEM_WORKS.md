@@ -538,3 +538,4 @@ implementation 'com.google.mlkit:translate:17.0.2'
 This documentation provides a comprehensive guide for new developers to understand and work with the Bouquet Bliss system. The dual-language approach ensures accessibility for both English and Malay-speaking developers.
 
 **Dokumentasi ini menyediakan panduan komprehensif untuk pembangun baru memahami dan bekerja dengan sistem Bouquet Bliss. Pendekatan dwi-bahasa memastikan kebolehcapaian untuk pembangun yang berbahasa Inggeris dan Melayu.**
+
