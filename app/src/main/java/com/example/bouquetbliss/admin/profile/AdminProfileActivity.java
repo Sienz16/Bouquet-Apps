@@ -77,13 +77,6 @@ public class AdminProfileActivity extends BaseAdminNavigationActivity {
 
         binding.btnEditName.setOnClickListener(v -> showEditNameDialog());
 
-        binding.btnChangePassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Change password functionality coming soon!", Toast.LENGTH_SHORT).show();
-        });
-
-        binding.btnAppSettings.setOnClickListener(v -> {
-            Toast.makeText(this, "App settings functionality coming soon!", Toast.LENGTH_SHORT).show();
-        });
     }
 
     private void loadUserProfile() {

@@ -63,6 +63,11 @@
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
 
         <activity
+            android:name=".admin.ratings.AdminRatingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BouquetBliss.NoActionBar" />
+
+        <activity
             android:name=".user.dashboard.UserDashboardActivity"
             android:exported="false"
             android:theme="@style/Theme.BouquetBliss.NoActionBar" />
